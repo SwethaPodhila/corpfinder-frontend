@@ -23,6 +23,7 @@ const sidebarLinks = [
 const DashboardLayout = () => {
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : { fullName: "user name" };
 
     return (
         <div className="flex min-h-screen bg-background">
@@ -58,8 +59,8 @@ const DashboardLayout = () => {
                             to={l.to}
                             onClick={() => setSidebarOpen(false)}
                             className={`sidebar-link ${location.pathname === l.to
-                                    ? "bg-accent text-accent-foreground"
-                                    : ""
+                                ? "bg-accent text-accent-foreground"
+                                : ""
                                 }`}
                         >
                             <l.icon className="h-4 w-4" />
@@ -110,7 +111,7 @@ const DashboardLayout = () => {
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                                 JD
                             </div>
-                            <span className="text-sm font-medium">John Doe</span>
+                            <span className="text-sm font-medium">{user.fullName}</span>
                         </div>
 
                     </div>

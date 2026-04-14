@@ -68,7 +68,7 @@ const AdminLogin = () => {
                     <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                         <div>
                             <label className="mb-1.5 block text-sm font-medium text-foreground">
-                                Admin Email
+                                Admin Username
                             </label>
                             <input
                                 type="email"

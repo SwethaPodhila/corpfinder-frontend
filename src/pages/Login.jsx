@@ -11,11 +11,38 @@ const Login = () => {
 
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate("/dashboard");
-    };
 
+        try {
+            const res = await fetch("http://localhost:5000/user/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg);
+                return;
+            }
+
+            // ✅ SAVE
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            alert("Login Success");
+            navigate("/dashboard");
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error");
+        }
+    };
+    
     return (
         <div className="flex min-h-screen">
             {/* Left Image */}
