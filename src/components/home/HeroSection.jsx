@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImg from "../../assets/hero-illustration2.jpg";
+import heroImg from "../../assets/corporate-team-building.webp";
 
 const HeroSection = () => (
     <section className="relative overflow-hidden pt-32 pb-20">
@@ -66,7 +66,7 @@ const HeroSection = () => (
                   <img
                         src={heroImg}
                         alt="Business collaboration"
-                        className="w-full rounded-3xl shadow-2xl"
+                        className="w-full rounded-3xl"
                     /> 
                 </motion.div>
 
