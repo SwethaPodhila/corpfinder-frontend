@@ -9,9 +9,38 @@ const AdminLogin = () => {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        navigate("/admin/dashboard");
+
+        try {
+            const res = await fetch("http://localhost:5000/admin/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    username: email, // same field use chestunnam
+                    password
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg);
+                return;
+            }
+
+            // store token
+            localStorage.setItem("adminToken", data.token);
+
+            // redirect
+            navigate("/admin/dashboard");
+
+        } catch (err) {
+            console.log(err);
+            alert("Login failed");
+        }
     };
 
     return (
@@ -71,11 +100,11 @@ const AdminLogin = () => {
                                 Admin Username
                             </label>
                             <input
-                                type="email"
+                                type="text"   // 🔥 change only this line
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="input-styled"
-                                placeholder="admin@corpfinder.com"
+                                placeholder="Enter username or email"
                                 required
                             />
                         </div>
