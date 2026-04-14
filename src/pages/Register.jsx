@@ -59,7 +59,7 @@ const Register = () => {
             return;
         }
 
-        const res = await fetch("http://localhost:5000/user/register", {
+        const res = await fetch("https://corpfinder-backend.onrender.com/user/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -85,7 +85,7 @@ const Register = () => {
     // 🔐 VERIFY OTP (ADDED ONLY)
     const verifyOtp = async () => {
         try {
-            const res = await fetch("http://localhost:5000/user/verify-otp", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/user/verify-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, otp }),
@@ -114,7 +114,7 @@ const Register = () => {
 
     // 🔁 RESEND OTP (ADDED ONLY)
     const resendOtp = async () => {
-        const res = await fetch("http://localhost:5000/user/resend-otp", {
+        const res = await fetch("https://corpfinder-backend.onrender.com/user/resend-otp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
