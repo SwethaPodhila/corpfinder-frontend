@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Search, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-//import heroImg from "../assets/hero-illustration.jpg";
+import heroImg from "../../assets/hero-illustration2.jpg";
 
 const HeroSection = () => (
     <section className="relative overflow-hidden pt-32 pb-20">
@@ -63,11 +63,11 @@ const HeroSection = () => (
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="hidden lg:block"
                 >
-                    {/* <img
+                  <img
                         src={heroImg}
                         alt="Business collaboration"
                         className="w-full rounded-3xl shadow-2xl"
-                    /> */}
+                    /> 
                 </motion.div>
 
             </div>
