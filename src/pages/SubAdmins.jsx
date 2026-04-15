@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import AdminSidebar from "../components/layout/AdminSidebar";
+import {jwtDecode} from "jwt-decode";
 
 const AdminManagement = () => {
     const [admins, setAdmins] = useState([]);
@@ -8,6 +9,22 @@ const AdminManagement = () => {
     const [password, setPassword] = useState("");
     const [editId, setEditId] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [adminName, setAdminName] = useState(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem("adminToken");
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                console.log(decoded);
+
+                setAdminName(decoded.username || decoded.email || "Admin");
+            } catch (err) {
+                console.log("Token decode error", err);
+            }
+        }
+    }, []);
 
     // 🔄 FETCH ADMINS
     const fetchAdmins = async () => {
@@ -148,7 +165,7 @@ const AdminManagement = () => {
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                             A
                         </div>
-                        <span className="text-sm font-medium">Admin</span>
+                        <span className="text-sm font-medium">{adminName}</span>
                     </div>
                 </header>
 
@@ -188,52 +205,67 @@ const AdminManagement = () => {
                     </div>
 
                     {/* TABLE */}
-                    <div className="rounded-2xl border bg-card overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b bg-muted/50">
-                                    <th className="px-4 py-3">#</th>
-                                    <th className="px-4 py-3">Username</th>
-                                    <th className="px-4 py-3">Role</th>
-                                    <th className="px-4 py-3">Actions</th>
+                    <div className="rounded-2xl border border-border bg-card overflow-x-auto shadow-sm">
+
+                        <table className="w-full text-sm text-foreground">
+
+                            {/* HEADER */}
+                            <thead className="bg-muted text-left text-xs uppercase tracking-wider text-gray-600">
+                                <tr>
+                                    <th className="px-5 py-4">#</th>
+                                    <th className="px-5 py-4">Username</th>
+                                    <th className="px-5 py-4">Role</th>
+                                    <th className="px-5 py-4">Actions</th>
                                 </tr>
                             </thead>
 
-                            <tbody>
+                            {/* BODY */}
+                            <tbody className="divide-y divide-border">
                                 {admins.map((admin, index) => (
-                                    <tr key={admin._id} className="border-b hover:bg-muted/30">
+                                    <tr
+                                        key={admin._id}
+                                        className="hover:bg-muted/40 transition"
+                                    >
 
-                                        <td className="px-4 py-3">{index + 1}</td>
+                                        <td className="px-5 py-4 font-medium text-gray-700">
+                                            {index + 1}
+                                        </td>
 
-                                        <td className="px-4 py-3">
+                                        <td className="px-5 py-4 font-semibold text-gray-900">
                                             {admin.username}
                                         </td>
 
-                                        <td className="px-4 py-3">
-                                            {admin.role}
+                                        <td className="px-5 py-4">
+                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                {admin.role}
+                                            </span>
                                         </td>
 
-                                        <td className="px-4 py-3">
+                                        {/* ACTIONS */}
+                                        <td className="px-5 py-4 flex items-center gap-3">
 
                                             <button
                                                 onClick={() => handleEdit(admin)}
-                                                className="text-blue-500"
+                                                className="px-3 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
                                             >
                                                 Edit
                                             </button>
 
                                             <button
                                                 onClick={() => handleDelete(admin._id)}
-                                                className="text-red-500 ml-3"
+                                                className="px-3 py-1 text-xs font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
                                             >
                                                 Delete
                                             </button>
 
                                         </td>
+
                                     </tr>
                                 ))}
                             </tbody>
+
                         </table>
+
                     </div>
 
                 </main>

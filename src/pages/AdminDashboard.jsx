@@ -2,16 +2,32 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import AdminSidebar from "../components/layout/AdminSidebar";
+import { jwtDecode } from "jwt-decode";
 
 const AdminDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [admins, setAdmins] = useState([]);
     const [users, setUsers] = useState([]);
+    const [adminName, setAdminName] = useState("");
+
+    useEffect(() => {
+        const token = localStorage.getItem("adminToken");
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                console.log(decoded);
+
+                setAdminName(decoded.username || decoded.email || "Admin");
+            } catch (err) {
+                console.log("Token decode error", err);
+            }
+        }
+    }, []);
 
     // 🔥 FETCH USERS
     const fetchUsers = async () => {
         try {
-            const res = await fetch("http://localhost:5000/user");
+            const res = await fetch("http://localhost:5000/user/users");
             const data = await res.json();
             setUsers(data);
         } catch (err) {
@@ -44,7 +60,7 @@ const AdminDashboard = () => {
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                             A
                         </div>
-                        <span className="text-sm font-medium">Admin</span>
+                        <span className="text-sm font-medium">{adminName}</span>
                     </div>
                 </header>
 
@@ -85,64 +101,73 @@ const AdminDashboard = () => {
                         <h2 className="font-heading text-xl font-bold mb-4">
                             Registered Users
                         </h2>
+                        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+                            <table className="w-full text-sm text-foreground">
 
-                        <div className="overflow-x-auto rounded-2xl border bg-card">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b bg-muted/50">
-                                        <th className="px-4 py-3">#</th>
-                                        <th className="px-4 py-3">Name</th>
-                                        <th className="px-4 py-3">Email</th>
-                                        <th className="px-4 py-3">Phone</th>
-                                        <th className="px-4 py-3">Status</th>
-                                        <th className="px-4 py-3">Verified</th>
-                                        <th className="px-4 py-3">Plan</th>
-                                        <th className="px-4 py-3">Expires</th>
+                                {/* HEADER */}
+                                <thead className="bg-muted text-left text-xs uppercase tracking-wider text-gray-600">
+                                    <tr>
+                                        <th className="px-5 py-4">#</th>
+                                        <th className="px-5 py-4">Name</th>
+                                        <th className="px-5 py-4">Email</th>
+                                        <th className="px-5 py-4">Phone</th>
+                                        <th className="px-5 py-4">Status</th>
+                                        <th className="px-5 py-4">Verified</th>
+                                        <th className="px-5 py-4">Plan</th>
+                                        <th className="px-5 py-4">Expires</th>
                                     </tr>
                                 </thead>
 
-                                <tbody>
+                                {/* BODY */}
+                                <tbody className="divide-y divide-border">
                                     {users.map((user, index) => (
-                                        <tr key={user._id} className="border-b hover:bg-muted/30">
+                                        <tr
+                                            key={user._id}
+                                            className="hover:bg-muted/40 transition-colors"
+                                        >
 
-                                            <td className="px-4 py-3">{index + 1}</td>
+                                            <td className="px-5 py-4 font-medium text-gray-700">
+                                                {index + 1}
+                                            </td>
 
-                                            <td className="px-4 py-3 font-medium">
+                                            <td className="px-5 py-4 font-semibold text-gray-900">
                                                 {user.fullName}
                                             </td>
 
-                                            <td className="px-4 py-3">
+                                            <td className="px-5 py-4 text-gray-600">
                                                 {user.email}
                                             </td>
 
-                                            <td className="px-4 py-3">
+                                            <td className="px-5 py-4 text-gray-600">
                                                 {user.phone}
                                             </td>
 
-                                            <td className="px-4 py-3">
-                                                <span className={`px-2 py-1 rounded text-xs ${user.status === "ACTIVE"
-                                                        ? "bg-green-100 text-green-600"
-                                                        : "bg-red-100 text-red-600"
+                                            <td className="px-5 py-4">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium
+                            ${user.status === "ACTIVE"
+                                                        ? "bg-green-100 text-green-700"
+                                                        : "bg-red-100 text-red-700"
                                                     }`}>
                                                     {user.status}
                                                 </span>
                                             </td>
 
-                                            <td className="px-4 py-3">
+                                            <td className="px-5 py-4 text-lg">
                                                 {user.isVerified ? "✅" : "❌"}
                                             </td>
 
-                                            <td className="px-4 py-3">
+                                            <td className="px-5 py-4 text-gray-700">
                                                 {user.planId === 1 ? "Trial" : "Paid"}
                                             </td>
 
-                                            <td className="px-4 py-3">
+                                            <td className="px-5 py-4 text-gray-600">
                                                 {new Date(user.trialEndsAt).toLocaleDateString()}
                                             </td>
 
                                         </tr>
                                     ))}
                                 </tbody>
+
                             </table>
                         </div>
                     </motion.div>

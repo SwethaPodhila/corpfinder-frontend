@@ -12,6 +12,8 @@ import Register from "./pages/Register";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import SubAdmins from "./pages/SubAdmins";
+import AdminAddEmployee from "./pages/AdminAddEmployee";
+import AddCompany from "./pages/AdminAddCompany";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -34,6 +36,8 @@ const App = () => {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/subAdmin" element={<SubAdmins />} />
+          <Route path="/admin/add-employee" element={<AdminAddEmployee />} />
+          <Route path="/admin/add-company" element={<AddCompany />} />
 
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
