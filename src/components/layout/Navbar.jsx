@@ -46,7 +46,7 @@ const Navbar = () => {
                         Log In
                     </Link>
 
-                    <Link to="/register" className="btn-primary text-sm px-5 py-2">
+                    <Link to="/register" className="btn-primary1 text-sm px-5 py-2">
                         Sign Up Free
                     </Link>
                 </div>
@@ -95,7 +95,7 @@ const Navbar = () => {
 
                         <Link
                             to="/register"
-                            className="btn-primary text-sm text-center"
+                            className="btn-primary1 text-sm text-center"
                             onClick={() => setOpen(false)}
                         >
                             Sign Up Free

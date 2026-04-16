@@ -83,7 +83,7 @@ const SubscriptionPage = () => {
                             className={`mt-6 w-full py-2 ${currentPlan === plan.name
                                     ? "bg-muted cursor-default"
                                     : plan.highlighted
-                                        ? "btn-primary"
+                                        ? "btn-primary1"
                                         : "btn-outline-primary"
                                 }`}
                         >

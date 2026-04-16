@@ -50,7 +50,7 @@ const DownloadsPage = () => {
                         <button
                             onClick={() => handleDownload(d.id)}
                             disabled={downloading === d.id}
-                            className="btn-primary px-4 py-2 text-xs"
+                            className="btn-primary1 px-4 py-2 text-xs"
                         >
                             {downloading === d.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />

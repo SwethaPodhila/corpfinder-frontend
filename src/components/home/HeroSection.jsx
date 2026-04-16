@@ -41,12 +41,12 @@ const HeroSection = () => (
                             placeholder="Search companies, people, roles..."
                             className="flex-1 bg-transparent outline-none px-2"
                         />
-                        <button className="btn-primary px-5 py-2">Search</button>
+                        <button className="btn-primary1 px-5 py-2">Search</button>
                     </div>
 
                     {/* Buttons */}
                     <div className="flex flex-wrap gap-4">
-                        <Link to="/register" className="btn-primary px-8 py-3">
+                        <Link to="/register" className="btn-primary1 px-8 py-3">
                             Get Started Free <ArrowRight className="h-4 w-4" />
                         </Link>
 

@@ -78,7 +78,7 @@ const PricingSection = () => (
                         {/* Button */}
                         <Link
                             to="/register"
-                            className={`mt-8 block text-center rounded-xl py-3 font-semibold ${plan.highlighted ? "btn-primary" : "btn-outline-primary"
+                            className={`mt-8 block text-center rounded-xl py-3 font-semibold ${plan.highlighted ? "btn-primary1" : "btn-outline-primary"
                                 }`}
                         >
                             Get Started
