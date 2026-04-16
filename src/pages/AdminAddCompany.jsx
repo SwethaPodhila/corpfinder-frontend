@@ -11,6 +11,14 @@ const AddCompany = () => {
     const [uploading, setUploading] = useState(false);
     const [companies, setCompanies] = useState([]);
     const [editData, setEditData] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+    const currentCompanies = companies.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(companies.length / itemsPerPage);
 
     const token = localStorage.getItem("adminToken");
 
@@ -32,6 +40,7 @@ const AddCompany = () => {
 
     const fetchCompanies = async () => {
         try {
+            console.log("Fetching companies with token:", token);
             const res = await fetch("http://localhost:5000/company/my-companies", {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -56,36 +65,76 @@ const AddCompany = () => {
         }
     };
 
+    useEffect(() => {
+        if (token) {
+            fetchCompanies();
+        }
+    }, [token]);
+
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this company?")) return;
+        const confirmDelete = window.confirm("Are you sure you want to delete this company?");
 
-        const res = await fetch(`http://localhost:5000/company/delete/${id}`, {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`
+        if (!confirmDelete) return; // ❌ stop here if cancel
+
+        try {
+            const res = await fetch(`http://localhost:5000/company/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setCompanies((prev) => prev.filter((c) => c._id !== id));
+            } else {
+                console.log(data);
             }
-        });
 
-        fetchCompanies();
+        } catch (err) {
+            console.log(err);
+        }
     };
 
     const handleUpdate = async () => {
-        const res = await fetch(`http://localhost:5000/company/update/${editData._id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify(editData)
-        });
+        try {
+            const res = await fetch(`http://localhost:5000/company/update/${editData._id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(editData)
+            });
 
-        setEditData(null);
-        fetchCompanies();
+            const data = await res.json();
+
+            if (res.ok) {
+                setCompanies((prev) =>
+                    prev.map((c) =>
+                        c._id === editData._id ? data : c
+                    )
+                );
+
+                setEditData(null);
+                // 🔥 refresh list after update
+                fetchCompanies();
+            } else {
+                console.log(data);
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const handleEdit = (company) => {
+        setEditData(company);
     };
 
     // 🔐 Get Admin Name
     useEffect(() => {
-
         if (token) {
             try {
                 const decoded = jwtDecode(token);
@@ -407,7 +456,7 @@ const AddCompany = () => {
                         <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
                             <h2 className="text-lg font-semibold">Company List</h2>
                             <span className="text-sm text-gray-500">
-                                Total: {companies.length}
+                                Total companies: {companies.length}
                             </span>
                         </div>
 
@@ -442,15 +491,15 @@ const AddCompany = () => {
                                         </tr>
                                     ) : (
                                         <>
-                                            {/* SUMMARY ROW */}
+                                            {/* SUMMARY ROW 
                                             <tr className="bg-gray-50">
                                                 <td colSpan="6" className="p-3 text-right text-sm text-gray-600">
                                                     Total Companies: {companies.length}
                                                 </td>
-                                            </tr>
+                                            </tr>*/}
 
                                             {/* DATA ROWS */}
-                                            {companies.map((c) => (
+                                            {currentCompanies.map((c) => (
                                                 <tr key={c._id} className="border-t hover:bg-gray-50">
                                                     <td className="p-3">{c.name}</td>
                                                     <td className="p-3">{c.city}</td>
@@ -464,10 +513,16 @@ const AddCompany = () => {
                                                     </td>
 
                                                     <td className="p-3 flex gap-2 justify-center">
-                                                        <button className="px-3 py-1 bg-blue-500 text-white rounded">
+                                                        <button
+                                                            onClick={() => handleEdit(c)}
+                                                            className="px-3 py-1 bg-blue-500 text-white rounded"
+                                                        >
                                                             Edit
                                                         </button>
-                                                        <button className="px-3 py-1 bg-red-500 text-white rounded">
+                                                        <button
+                                                            onClick={() => handleDelete(c._id)}
+                                                            className="px-3 py-1 bg-red-500 text-white rounded"
+                                                        >
                                                             Delete
                                                         </button>
                                                     </td>
@@ -537,10 +592,44 @@ const AddCompany = () => {
                         </div>
                     )}
 
+
+                    <div className="flex justify-center items-center gap-2 p-4">
+
+                        <button
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                            Prev
+                        </button>
+
+                        {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setCurrentPage(i + 1)}
+                                className={`px-3 py-1 rounded ${currentPage === i + 1
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-200"
+                                    }`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+
+                        <button
+                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                            Next
+                        </button>
+
+                    </div>
+
                 </main>
             </div>
         </div>
     );
 };
 
-export default AddCompany;
+export default AddCompany; 

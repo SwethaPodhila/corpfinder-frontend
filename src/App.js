@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import SubAdmins from "./pages/SubAdmins";
 import AdminAddEmployee from "./pages/AdminAddEmployee";
 import AddCompany from "./pages/AdminAddCompany";
+import AdminViewData from "./pages/AdminViewData";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/admin/subAdmin" element={<SubAdmins />} />
           <Route path="/admin/add-employee" element={<AdminAddEmployee />} />
           <Route path="/admin/add-company" element={<AddCompany />} />
+          <Route path="/admin/view-data" element={<AdminViewData />} />
 
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
