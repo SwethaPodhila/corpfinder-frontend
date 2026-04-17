@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Menu } from "lucide-react";
 import AdminSidebar from "../components/layout/AdminSidebar";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const AdminManagement = () => {
     const [admins, setAdmins] = useState([]);
@@ -10,6 +10,7 @@ const AdminManagement = () => {
     const [editId, setEditId] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [adminName, setAdminName] = useState(null);
+    const [role, setRole] = useState("");
 
     useEffect(() => {
         const token = localStorage.getItem("adminToken");
@@ -45,9 +46,26 @@ const AdminManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // 🔒 VALIDATIONS
+        if (!username || username.trim().length < 3) {
+            alert("Username must be at least 3 characters");
+            return;
+        }
+
+        if (!editId && (!password || password.length < 3)) {
+            alert("Password must be at least 3 characters");
+            return;
+        }
+
+        if (!role) {
+            alert("Please select role");
+            return;
+        }
+
         try {
             let bodyData = {
-                username
+                username: username.trim(),
+                role
             };
 
             // 🔥 password unte maatrame send
@@ -57,7 +75,7 @@ const AdminManagement = () => {
 
             if (editId) {
                 // UPDATE
-                const res = await fetch(`https://corpfinder-backend.onrender.com/admin/${editId}`, {
+                const res = await fetch(`http://localhost:5000/admin/${editId}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json"
@@ -75,7 +93,7 @@ const AdminManagement = () => {
                 alert("Admin updated successfully");
             } else {
                 // CREATE
-                const res = await fetch("https://corpfinder-backend.onrender.com/admin/register", {
+                const res = await fetch("http://localhost:5000/admin/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -96,6 +114,7 @@ const AdminManagement = () => {
             // RESET
             setUsername("");
             setPassword("");
+            setRole(""); // 🔥 reset role also
             setEditId(null);
             fetchAdmins();
 
@@ -197,6 +216,17 @@ const AdminManagement = () => {
                                 className="input-styled"
                                 required={!editId}
                             />
+
+                            <select
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
+                                className="input-styled"
+                                required
+                            >
+                                <option value="">Select Role</option>
+                                <option value="subadmin">Sub Admin</option>
+                                <option value="superadmin">Super Admin</option>
+                            </select>
 
                             <button className="btn-primary">
                                 {editId ? "Update" : "Create"}
