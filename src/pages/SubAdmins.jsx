@@ -29,7 +29,7 @@ const AdminManagement = () => {
     // 🔄 FETCH ADMINS
     const fetchAdmins = async () => {
         try {
-            const res = await fetch("http://localhost:5000/admin");
+            const res = await fetch("https://corpfinder-backend.onrender.com/admin");
             const data = await res.json();
             setAdmins(data);
         } catch (err) {
@@ -57,7 +57,7 @@ const AdminManagement = () => {
 
             if (editId) {
                 // UPDATE
-                const res = await fetch(`http://localhost:5000/admin/${editId}`, {
+                const res = await fetch(`https://corpfinder-backend.onrender.com/admin/${editId}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json"
@@ -75,7 +75,7 @@ const AdminManagement = () => {
                 alert("Admin updated successfully");
             } else {
                 // CREATE
-                const res = await fetch("http://localhost:5000/admin/register", {
+                const res = await fetch("https://corpfinder-backend.onrender.com/admin/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -112,7 +112,7 @@ const AdminManagement = () => {
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`http://localhost:5000/admin/${id}`, {
+            const res = await fetch(`https://corpfinder-backend.onrender.com/admin/${id}`, {
                 method: "DELETE"
             });
 

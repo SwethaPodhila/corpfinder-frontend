@@ -58,7 +58,7 @@ const SearchPage = () => {
             });
 
             const res = await fetch(
-                `http://localhost:5000/filters/search?${params.toString()}`
+                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`
             );
 
             const data = await res.json();
@@ -109,7 +109,7 @@ const SearchPage = () => {
     // -----------------------------
     useEffect(() => {
         const fetchFilters = async () => {
-            const res = await fetch("http://localhost:5000/filters/filters");
+            const res = await fetch("https://corpfinder-backend.onrender.com/filters/filters");
             const data = await res.json();
 
             setOptions({

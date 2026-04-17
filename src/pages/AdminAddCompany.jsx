@@ -41,7 +41,7 @@ const AddCompany = () => {
     const fetchCompanies = async () => {
         try {
             console.log("Fetching companies with token:", token);
-            const res = await fetch("http://localhost:5000/company/my-companies", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/company/my-companies", {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -77,7 +77,7 @@ const AddCompany = () => {
         if (!confirmDelete) return; // ❌ stop here if cancel
 
         try {
-            const res = await fetch(`http://localhost:5000/company/delete/${id}`, {
+            const res = await fetch(`https://corpfinder-backend.onrender.com/company/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -99,7 +99,7 @@ const AddCompany = () => {
 
     const handleUpdate = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/company/update/${editData._id}`, {
+            const res = await fetch(`https://corpfinder-backend.onrender.com/company/update/${editData._id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -172,7 +172,7 @@ const AddCompany = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/company/add-company", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/company/add-company", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -259,7 +259,7 @@ const AddCompany = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("http://localhost:5000/company/upload-companies", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/company/upload-companies", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}` // 🔥 MUST

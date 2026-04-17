@@ -41,7 +41,7 @@ const AddEmployee = () => {
 
     const fetchEmployees = async () => {
         try {
-            const res = await fetch("http://localhost:5000/employee/my-employees", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employee/my-employees", {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
                 }
@@ -112,7 +112,7 @@ const AddEmployee = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/employee/add-employee", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employee/add-employee", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -187,7 +187,7 @@ const AddEmployee = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("http://localhost:5000/employee/upload-employees", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employee/upload-employees", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
@@ -263,7 +263,7 @@ const AddEmployee = () => {
             const confirmDelete = window.confirm("Are you sure you want to delete?");
             if (!confirmDelete) return;
 
-            const res = await fetch(`http://localhost:5000/employee/delete-employee/${id}`, {
+            const res = await fetch(`https://corpfinder-backend.onrender.com/employee/delete-employee/${id}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
@@ -291,7 +291,7 @@ const AddEmployee = () => {
     const handleUpdate = async () => {
         try {
             const res = await fetch(
-                `http://localhost:5000/employee/update-employee/${editingId}`,
+                `https://corpfinder-backend.onrender.com/employee/update-employee/${editingId}`,
                 {
                     method: "PUT",
                     headers: {

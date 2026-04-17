@@ -35,7 +35,7 @@ const ViewData = () => {
     }, []);
 
     const fetchAllEmployees = async () => {
-        const res = await fetch("http://localhost:5000/employee/all", {
+        const res = await fetch("https://corpfinder-backend.onrender.com/employee/all", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("adminToken")}`
             }
@@ -45,7 +45,7 @@ const ViewData = () => {
     };
 
     const fetchAllCompanies = async () => {
-        const res = await fetch("http://localhost:5000/company/all", {
+        const res = await fetch("https://corpfinder-backend.onrender.com/company/all", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("adminToken")}`
             }

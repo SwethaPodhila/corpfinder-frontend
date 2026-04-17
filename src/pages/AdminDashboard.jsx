@@ -27,7 +27,7 @@ const AdminDashboard = () => {
     // 🔥 FETCH USERS
     const fetchUsers = async () => {
         try {
-            const res = await fetch("http://localhost:5000/user/users");
+            const res = await fetch("https://corpfinder-backend.onrender.com/user/users");
             const data = await res.json();
             setUsers(data);
         } catch (err) {
