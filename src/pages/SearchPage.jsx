@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Search as SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { useNavigate } from "react-router-dom";
+import { Download } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
 
 const SearchPage = () => {
     const [query, setQuery] = useState("");
     const [tab, setTab] = useState("people");
+    const navigate = useNavigate();
 
     const [filters, setFilters] = useState({
         industry: "",
@@ -76,6 +81,14 @@ const SearchPage = () => {
     // DEBOUNCE (AUTO SEARCH)
     // -----------------------------
     useEffect(() => {
+        const isQueryEmpty = !query.trim();
+        const areFiltersEmpty = Object.values(filters).every(v => !v);
+
+        // ❌ Empty unte API call cheyyaku
+        if (isQueryEmpty && areFiltersEmpty) {
+            return;
+        }
+
         const timer = setTimeout(() => {
             handleSearch();
         }, 600);
@@ -124,11 +137,30 @@ const SearchPage = () => {
         fetchFilters();
     }, []);
 
+    const downloadExcel = () => {
+        if (!results || results.length === 0) {
+            alert("No data available to download");
+            return;
+        }
+
+        const worksheet = XLSX.utils.json_to_sheet(results);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+
+        const excelBuffer = XLSX.write(workbook, {
+            bookType: "xlsx",
+            type: "array"
+        });
+
+        const file = new Blob([excelBuffer], { type: "application/octet-stream" });
+        saveAs(file, "search-results.xlsx");
+    };
+
     return (
         <div className="p-6">
 
             {/* SEARCH */}
-            <div className="flex items-center gap-3 border p-3 rounded-xl">
+            <div className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 border border-gray-200">
                 <SearchIcon />
                 <input
                     value={query}
@@ -140,12 +172,12 @@ const SearchPage = () => {
                         if (e.key === "Enter") handleSearch();
                     }}
                     placeholder="Search anything..."
-                    className="flex-1 outline-none"
+                    className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
                 />
 
                 <button
                     onClick={handleSearch}
-                    className="px-4 py-2 bg-black text-white rounded-lg"
+                    className="btn-primary1"
                 >
                     Search
                 </button>
@@ -154,27 +186,27 @@ const SearchPage = () => {
             {/* FILTERS */}
             <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
 
-                <select value={filters.industry} onChange={(e) => updateFilter("industry", e.target.value)}>
+                <select className="input-pro" value={filters.industry} onChange={(e) => updateFilter("industry", e.target.value)}>
                     <option value="">Industry</option>
                     {options.industries.map((i, idx) => <option key={idx}>{i}</option>)}
                 </select>
 
-                <select value={filters.designation} onChange={(e) => updateFilter("designation", e.target.value)}>
+                <select className="input-pro" value={filters.designation} onChange={(e) => updateFilter("designation", e.target.value)}>
                     <option value="">Designation</option>
                     {options.designations.map((i, idx) => <option key={idx}>{i}</option>)}
                 </select>
 
-                <select value={filters.country} onChange={(e) => updateFilter("country", e.target.value)}>
+                <select className="input-pro" value={filters.country} onChange={(e) => updateFilter("country", e.target.value)}>
                     <option value="">Country</option>
                     {options.countries.map((i, idx) => <option key={idx}>{i}</option>)}
                 </select>
 
-                <select value={filters.state} onChange={(e) => updateFilter("state", e.target.value)}>
+                <select className="input-pro" value={filters.state} onChange={(e) => updateFilter("state", e.target.value)}>
                     <option value="">State</option>
                     {options.states.map((i, idx) => <option key={idx}>{i}</option>)}
                 </select>
 
-                <select value={filters.city} onChange={(e) => updateFilter("city", e.target.value)}>
+                <select className="input-pro" value={filters.city} onChange={(e) => updateFilter("city", e.target.value)}>
                     <option value="">City</option>
                     {options.cities.map((i, idx) => <option key={idx}>{i}</option>)}
                 </select>
@@ -182,47 +214,119 @@ const SearchPage = () => {
             </div>
 
             {/* TABS */}
-            <div className="mt-4 flex gap-3">
-                {["people", "companies"].map((t) => (
-                    <button
-                        key={t}
-                        onClick={() => {
-                            setTab(t);
-                            setPage(1);
-                        }}
-                        className={`px-4 py-2 rounded ${tab === t ? "bg-black text-white" : "bg-gray-200"}`}
-                    >
-                        {t}
-                    </button>
-                ))}
+            <div className="mt-4 flex gap-3 items-center justify-between flex-wrap">
+                <div className="mt-2 flex gap-3 bg-gray-100 p-1 rounded-xl w-fit">
+
+                    {["people", "companies"].map((t) => (
+                        <button
+                            key={t}
+                            onClick={() => {
+                                setTab(t);
+                                setPage(1);
+                            }}
+                            className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200
+                ${tab === t
+                                    ? "bg-[rgba(10,132,162,1)] text-white shadow-sm"
+                                    : "text-gray-500 hover:text-gray-700"
+                                }`}
+                        >
+                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                        </button>
+                    ))}
+                </div>
+                <button
+                    onClick={downloadExcel}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg 
+               bg-emerald-600 text-white text-sm font-medium
+               hover:bg-emerald-700 transition-all duration-200 shadow-sm"
+                >
+                    <Download size={16} />
+                    Export Excel
+                </button>
             </div>
 
-            {/* RESULTS */}
             {/* RESULTS TABLE */}
-            <div className="mt-6 overflow-x-auto">
+            <div className="mt-6 bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
 
                 {!searched ? (
-                    <p className="text-center text-gray-400">Start searching...</p>
+                    <div className="flex flex-col items-center justify-center mt-20 text-gray-600 mb-20">
+
+                        <div className="bg-gray-100 p-4 rounded-full mb-4">
+                            <SearchIcon size={28} className="text-gray-500" />
+                        </div>
+
+                        <p className="text-xl font-semibold">Start searching</p>
+
+                        <p className="text-sm text-gray-400 mt-1 ">
+                            Search people or companies by name, role, or location
+                        </p>
+
+                    </div>
                 ) : loading ? (
-                    <p className="text-center">Loading...</p>
+                    <div className="text-center mt-20 flex flex-col items-center gap-3 mb-20">
+
+                        {/* Spinner */}
+                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        {/* Text */}
+                        <p className="text-lg font-semibold text-gray-700">
+                            Searching...
+                        </p>
+                        <p className="text-sm text-gray-400">
+                            We’re fetching the best results for you
+                        </p>
+
+                    </div>
                 ) : paged.length === 0 ? (
-                    <p className="text-center">No results found</p>
+                    <div className="text-center py-20 flex flex-col items-center">
+
+                        {/* Icon */}
+                        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                            <span className="text-2xl">🔍</span>
+                        </div>
+
+                        {/* Title */}
+                        <p className="text-xl font-semibold text-gray-700">
+                            No results found
+                        </p>
+
+                        {/* Subtitle */}
+                        <p className="text-sm text-gray-400 mt-2 max-w-sm">
+                            We couldn’t find anything matching your search. Try different keywords or adjust your filters.
+                        </p>
+
+                        {/* Action Button */}
+                        <button
+                            onClick={() => {
+                                setQuery("");
+                                setFilters({
+                                    industry: "",
+                                    designation: "",
+                                    country: "",
+                                    state: "",
+                                    city: ""
+                                });
+                            }}
+                            className="mt-5 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+                        >
+                            Clear Filters
+                        </button>
+
+                    </div>
+
                 ) : (
                     <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
 
                         {/* HEADER */}
-                        <thead className="bg-gray-100 text-left text-sm">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 text-xs uppercase tracking-wide">
                             <tr>
                                 <th className="p-3 border">Name</th>
                                 <th className="p-3 border">Designation</th>
                                 <th className="p-3 border">Company</th>
-                                <th className="p-3 border">Email</th>
-                                <th className="p-3 border">Phone</th>
+
                                 <th className="p-3 border">Industry</th>
                                 <th className="p-3 border">City</th>
                                 <th className="p-3 border">State</th>
                                 <th className="p-3 border">Country</th>
-                                <th className="p-3 border">Description</th>
                             </tr>
                         </thead>
 
@@ -233,54 +337,44 @@ const SearchPage = () => {
                                 <tr key={item._id} className="hover:bg-gray-50">
 
                                     {/* NAME */}
-                                    <td className="p-3 border font-medium">
+                                    <td
+                                        className="p-3 border font-medium cursor-pointer transition"
+                                        style={{ color: "rgba(10, 132, 162, 1)" }}
+                                        onClick={() => navigate(`/profile/${item._id}`)}
+                                    >
                                         {item.name || "-"}
                                     </td>
 
                                     {/* DESIGNATION */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.designation || "-"}
                                     </td>
 
                                     {/* COMPANY */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.company || item.name || "-"}
                                     </td>
 
-                                    {/* EMAIL */}
-                                    <td className="p-3 border">
-                                        {item.email || "-"}
-                                    </td>
-
-                                    {/* PHONE */}
-                                    <td className="p-3 border">
-                                        {item.phone || "-"}
-                                    </td>
-
                                     {/* INDUSTRY */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.industry || "-"}
                                     </td>
 
                                     {/* CITY */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.city || "-"}
                                     </td>
 
                                     {/* STATE */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.state || "-"}
                                     </td>
 
                                     {/* COUNTRY */}
-                                    <td className="p-3 border">
+                                    <td className="px-4 py-3 text-gray-700">
                                         {item.country || "-"}
                                     </td>
 
-                                    {/* DESCRIPTION */}
-                                    <td className="p-3 border text-gray-600 max-w-xs truncate">
-                                        {item.description || "-"}
-                                    </td>
 
                                 </tr>
                             ))}
