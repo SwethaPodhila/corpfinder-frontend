@@ -14,6 +14,7 @@ const AddEmployee = () => {
     const [employees, setEmployees] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
+    const [userRole, setUserRole] = useState("");
 
     const [error, setError] = useState("");
     const [popup, setPopup] = useState({
@@ -81,6 +82,7 @@ const AddEmployee = () => {
             try {
                 const decoded = jwtDecode(token);
                 setAdminName(decoded.username || decoded.email || "Admin");
+                setUserRole(decoded.role);
             } catch (err) {
                 console.log(err);
             }
@@ -533,8 +535,21 @@ const AddEmployee = () => {
 
                                                     {/* DELETE */}
                                                     <button
-                                                        onClick={() => handleDelete(emp._id)}
-                                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                        onClick={() => {
+                                                            if (userRole !== "superadmin") {
+                                                                setPopup({
+                                                                    show: true,
+                                                                    type: "error",
+                                                                    message: "❌ You don't have permission to delete employees"
+                                                                });
+                                                                return;
+                                                            }
+                                                            handleDelete(emp._id);
+                                                        }}
+                                                        className={`px-3 py-1 text-white rounded ${userRole !== "superadmin"
+                                                            ? "bg-red-300 cursor-not-allowed"
+                                                            : "bg-red-500 hover:bg-red-600"
+                                                            }`}
                                                     >
                                                         Delete
                                                     </button>

@@ -12,6 +12,7 @@ const AddCompany = () => {
     const [companies, setCompanies] = useState([]);
     const [editData, setEditData] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [userRole, setUserRole] = useState("");
     const itemsPerPage = 20;
 
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -139,6 +140,7 @@ const AddCompany = () => {
             try {
                 const decoded = jwtDecode(token);
                 setAdminName(decoded.username || decoded.email || "Admin");
+                setUserRole(decoded.role); // 🔥 store role
             } catch (err) {
                 console.log(err);
             }
@@ -520,8 +522,21 @@ const AddCompany = () => {
                                                             Edit
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(c._id)}
-                                                            className="px-3 py-1 bg-red-500 text-white rounded"
+                                                            onClick={() => {
+                                                                if (userRole !== "superadmin") {
+                                                                    setPopup({
+                                                                        show: true,
+                                                                        type: "error",
+                                                                        message: "❌ You don't have permission to delete companies"
+                                                                    });
+                                                                    return;
+                                                                }
+                                                                handleDelete(c._id);
+                                                            }}
+                                                            className={`px-3 py-1 rounded text-white ${userRole !== "superadmin"
+                                                                ? "bg-red-300 cursor-not-allowed"
+                                                                : "bg-red-500 hover:bg-red-600"
+                                                                }`}
                                                         >
                                                             Delete
                                                         </button>

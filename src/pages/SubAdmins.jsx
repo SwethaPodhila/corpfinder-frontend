@@ -11,19 +11,32 @@ const AdminManagement = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [adminName, setAdminName] = useState(null);
     const [role, setRole] = useState("");
+    const [accessError, setAccessError] = useState("");
 
     useEffect(() => {
         const token = localStorage.getItem("adminToken");
 
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                console.log(decoded);
+        if (!token) {
+            window.location.href = "/login";
+            return;
+        }
 
-                setAdminName(decoded.username || decoded.email || "Admin");
-            } catch (err) {
-                console.log("Token decode error", err);
+        try {
+            const decoded = jwtDecode(token);
+            console.log(decoded);
+
+            setAdminName(decoded.username || decoded.email || "Admin");
+
+            // 🔥 ROLE CHECK
+            if (decoded.role !== "superadmin") {
+                setAccessError("Access denied! Only Super Admin allowed");
+                // window.location.href = "/dashboard"; // or any page
+                return;
             }
+
+        } catch (err) {
+            console.log("Token decode error", err);
+            window.location.href = "/login";
         }
     }, []);
 
@@ -75,7 +88,7 @@ const AdminManagement = () => {
 
             if (editId) {
                 // UPDATE
-                const res = await fetch(`http://localhost:5000/admin/${editId}`, {
+                const res = await fetch(`https://corpfinder-backend.onrender.com/admin/${editId}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json"
@@ -93,7 +106,7 @@ const AdminManagement = () => {
                 alert("Admin updated successfully");
             } else {
                 // CREATE
-                const res = await fetch("http://localhost:5000/admin/register", {
+                const res = await fetch("https://corpfinder-backend.onrender.com/admin/register", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -191,116 +204,113 @@ const AdminManagement = () => {
                 {/* CONTENT */}
                 <main className="flex-1 p-6">
 
-                    {/* FORM */}
-                    <div className="mb-6 rounded-xl border bg-card p-4">
-                        <h2 className="font-bold mb-3">
-                            {editId ? "Update Admin" : "Create Admin"}
-                        </h2>
+                    {accessError ? (
+                        <div className="flex items-center justify-center h-[70vh]">
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl shadow text-center">
+                                <h2 className="font-semibold text-lg mb-2">Access Denied</h2>
+                                <p>{accessError}</p>
 
-                        <form onSubmit={handleSubmit} className="flex gap-3 flex-wrap">
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {/* FORM */}
+                            <div className="mb-6 rounded-xl border bg-card p-4">
+                                <h2 className="font-bold mb-3">
+                                    {editId ? "Update Admin" : "Create Admin"}
+                                </h2>
 
-                            <input
-                                type="text"
-                                placeholder="Username or Email"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="input-styled"
-                                required
-                            />
+                                <form onSubmit={handleSubmit} className="flex gap-3 flex-wrap">
 
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="input-styled"
-                                required={!editId}
-                            />
+                                    <input
+                                        type="text"
+                                        placeholder="Username or Email"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="input-styled"
+                                        required
+                                    />
 
-                            <select
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
-                                className="input-styled"
-                                required
-                            >
-                                <option value="">Select Role</option>
-                                <option value="subadmin">Sub Admin</option>
-                                <option value="superadmin">Super Admin</option>
-                            </select>
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="input-styled"
+                                        required={!editId}
+                                    />
 
-                            <button className="btn-primary">
-                                {editId ? "Update" : "Create"}
-                            </button>
-                        </form>
-                    </div>
-
-                    {/* TABLE */}
-                    <div className="rounded-2xl border border-border bg-card overflow-x-auto shadow-sm">
-
-                        <table className="w-full text-sm text-foreground">
-
-                            {/* HEADER */}
-                            <thead className="bg-muted text-left text-xs uppercase tracking-wider text-gray-600">
-                                <tr>
-                                    <th className="px-5 py-4">#</th>
-                                    <th className="px-5 py-4">Username</th>
-                                    <th className="px-5 py-4">Role</th>
-                                    <th className="px-5 py-4">Actions</th>
-                                </tr>
-                            </thead>
-
-                            {/* BODY */}
-                            <tbody className="divide-y divide-border">
-                                {admins.map((admin, index) => (
-                                    <tr
-                                        key={admin._id}
-                                        className="hover:bg-muted/40 transition"
+                                    <select
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                        className="input-styled"
+                                        required
                                     >
+                                        <option value="">Select Role</option>
+                                        <option value="subadmin">Sub Admin</option>
+                                        <option value="superadmin">Super Admin</option>
+                                    </select>
 
-                                        <td className="px-5 py-4 font-medium text-gray-700">
-                                            {index + 1}
-                                        </td>
+                                    <button className="btn-primary">
+                                        {editId ? "Update" : "Create"}
+                                    </button>
+                                </form>
+                            </div>
 
-                                        <td className="px-5 py-4 font-semibold text-gray-900">
-                                            {admin.username}
-                                        </td>
+                            {/* TABLE */}
+                            <div className="rounded-2xl border border-border bg-card overflow-x-auto shadow-sm">
+                                <table className="w-full text-sm text-foreground">
 
-                                        <td className="px-5 py-4">
-                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                                {admin.role}
-                                            </span>
-                                        </td>
+                                    <thead className="bg-muted text-left text-xs uppercase tracking-wider text-gray-600">
+                                        <tr>
+                                            <th className="px-5 py-4">#</th>
+                                            <th className="px-5 py-4">Username</th>
+                                            <th className="px-5 py-4">Role</th>
+                                            <th className="px-5 py-4">Actions</th>
+                                        </tr>
+                                    </thead>
 
-                                        {/* ACTIONS */}
-                                        <td className="px-5 py-4 flex items-center gap-3">
+                                    <tbody className="divide-y divide-border">
+                                        {admins.map((admin, index) => (
+                                            <tr key={admin._id} className="hover:bg-muted/40 transition">
 
-                                            <button
-                                                onClick={() => handleEdit(admin)}
-                                                className="px-3 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
-                                            >
-                                                Edit
-                                            </button>
+                                                <td className="px-5 py-4">{index + 1}</td>
+                                                <td className="px-5 py-4 font-semibold">{admin.username}</td>
 
-                                            <button
-                                                onClick={() => handleDelete(admin._id)}
-                                                className="px-3 py-1 text-xs font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
-                                            >
-                                                Delete
-                                            </button>
+                                                <td className="px-5 py-4">
+                                                    <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700">
+                                                        {admin.role}
+                                                    </span>
+                                                </td>
 
-                                        </td>
+                                                <td className="px-5 py-4 flex gap-3">
+                                                    <button
+                                                        onClick={() => handleEdit(admin)}
+                                                        className="px-3 py-1 text-xs bg-blue-50 text-blue-600 rounded-lg"
+                                                    >
+                                                        Edit
+                                                    </button>
 
-                                    </tr>
-                                ))}
-                            </tbody>
+                                                    <button
+                                                        onClick={() => handleDelete(admin._id)}
+                                                        className="px-3 py-1 text-xs bg-red-50 text-red-600 rounded-lg"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
 
-                        </table>
+                                            </tr>
+                                        ))}
+                                    </tbody>
 
-                    </div>
+                                </table>
+                            </div>
+                        </>
+                    )}
 
                 </main>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
