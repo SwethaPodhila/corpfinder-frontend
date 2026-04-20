@@ -1,16 +1,67 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Search as SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate } from "react-router-dom";
 import { Download } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 10;
 
 const SearchPage = () => {
+    const location = useLocation();
     const [query, setQuery] = useState("");
     const [tab, setTab] = useState("people");
     const navigate = useNavigate();
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const q = params.get("query");
+
+        if (q) {
+            setQuery(q);
+            handleSearchFromHistory(q);
+        }
+    }, [location.search]);
+
+    const handleSearchFromHistory = async (q) => {
+        setLoading(true);
+        setSearched(true);
+
+        try {
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters).filter(([_, v]) => v && v.trim() !== "")
+            );
+
+            const params = new URLSearchParams();
+
+            params.append("query", q);
+            params.append("type", tab);
+
+            Object.entries(cleanFilters).forEach(([k, v]) => {
+                params.append(k, v);
+            });
+
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(
+                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const data = await res.json();
+
+            setResults(data);
+            setPage(1);
+        } catch (err) {
+            console.log(err);
+        }
+
+        setLoading(false);
+    };
 
     const [filters, setFilters] = useState({
         industry: "",
@@ -44,7 +95,19 @@ const SearchPage = () => {
     // -----------------------------
     // SMART SEARCH FUNCTION
     // -----------------------------
+    const lastQueryRef = useRef("");
+
     const handleSearch = useCallback(async () => {
+        const cleanQuery = query.trim().toLowerCase();
+
+        // ❌ empty or space only
+        if (!cleanQuery) return;
+
+        // ❌ prevent duplicate API calls
+        if (lastQueryRef.current === cleanQuery) return;
+
+        lastQueryRef.current = cleanQuery;
+
         setLoading(true);
         setSearched(true);
 
@@ -55,46 +118,35 @@ const SearchPage = () => {
 
             const params = new URLSearchParams();
 
-            if (query.trim()) params.append("query", query.trim());
+            params.append("query", cleanQuery);
             params.append("type", tab);
 
             Object.entries(cleanFilters).forEach(([k, v]) => {
                 params.append(k, v);
             });
 
+            const token = localStorage.getItem("token");
+
             const res = await fetch(
-                `http://localhost:5000/filters/search?${params.toString()}`
+                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
 
             const data = await res.json();
 
             setResults(data);
             setPage(1);
+
         } catch (err) {
             console.log(err);
         }
 
         setLoading(false);
     }, [query, tab, filters]);
-
-    // -----------------------------
-    // DEBOUNCE (AUTO SEARCH)
-    // -----------------------------
-    useEffect(() => {
-        const isQueryEmpty = !query.trim();
-        const areFiltersEmpty = Object.values(filters).every(v => !v);
-
-        // ❌ Empty unte API call cheyyaku
-        if (isQueryEmpty && areFiltersEmpty) {
-            return;
-        }
-
-        const timer = setTimeout(() => {
-            handleSearch();
-        }, 600);
-
-        return () => clearTimeout(timer);
-    }, [query, filters, tab, handleSearch]);
 
     // -----------------------------
     // FILTER UPDATE
@@ -137,12 +189,13 @@ const SearchPage = () => {
         fetchFilters();
     }, []);
 
-    const downloadExcel = () => {
+    const downloadExcel = async () => {
         if (!results || results.length === 0) {
             alert("No data available to download");
             return;
         }
 
+        // 👉 create excel
         const worksheet = XLSX.utils.json_to_sheet(results);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
@@ -152,8 +205,43 @@ const SearchPage = () => {
             type: "array"
         });
 
-        const file = new Blob([excelBuffer], { type: "application/octet-stream" });
-        saveAs(file, "search-results.xlsx");
+        // 👉 dynamic file name (based on query)
+        const cleanQuery = query
+            ? query.replace(/\s+/g, "-").toLowerCase()
+            : "results";
+
+        const fileName = `${cleanQuery}-${Date.now()}.xlsx`;
+
+        const file = new Blob([excelBuffer], {
+            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        });
+
+        // 👉 formdata
+        const formData = new FormData();
+        formData.append("file", file, fileName);
+        formData.append("name", fileName);
+        formData.append("recordCount", results.length);
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch("https://corpfinder-backend.onrender.com/downloads/upload", {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            const data = await res.json();
+            console.log("Upload response:", data);
+
+        } catch (err) {
+            console.log("Upload error:", err);
+        }
+
+        // 👉 local download
+        saveAs(file, fileName);
     };
 
     return (
@@ -164,14 +252,12 @@ const SearchPage = () => {
                 <SearchIcon />
                 <input
                     value={query}
-                    onChange={(e) => {
-                        setQuery(e.target.value);
-                        setPage(1);
-                    }}
+                    onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSearch();
-                    }}
-                    placeholder="Search anything..."
+                        if (e.key === "Enter") {
+                            handleSearch();
+                        }
+                    }} placeholder={`Search ${tab === "people" ? "people, roles, companies..." : "companies, industries..."}`}
                     className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
                 />
 
