@@ -63,7 +63,7 @@ const SearchPage = () => {
             });
 
             const res = await fetch(
-                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`
+                `http://localhost:5000/filters/search?${params.toString()}`
             );
 
             const data = await res.json();
