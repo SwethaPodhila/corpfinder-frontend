@@ -18,7 +18,7 @@ const DownloadsPage = () => {
                 const token = localStorage.getItem("token");
 
                 const res = await fetch(
-                    "http://localhost:5000/downloads/history",
+                    "https://corpfinder-backend.onrender.com/downloads/history",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`
