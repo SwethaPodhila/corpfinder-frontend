@@ -60,6 +60,7 @@ const DownloadsPage = () => {
             setDownloading(null);
         }
     };
+    
     return (
         <div>
             {/* HEADER */}
