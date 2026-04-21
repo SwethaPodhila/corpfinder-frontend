@@ -428,7 +428,7 @@ const AddCompany = () => {
                         <p className="text-xs text-gray-400 mt-3 text-center">
                             Format: company name, city, state, country
                         </p>
-
+                        
                     </motion.div>
 
                     {/* 🔥 POPUP */}

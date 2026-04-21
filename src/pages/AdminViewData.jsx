@@ -15,6 +15,13 @@ const ViewData = () => {
 
     const [empSearch, setEmpSearch] = useState("");
     const [compSearch, setCompSearch] = useState("");
+    const [adminRole, setAdminRole] = useState("");
+
+    const [editingId, setEditingId] = useState(null);
+    const [editForm, setEditForm] = useState({});
+
+    const [editingCompanyId, setEditingCompanyId] = useState(null);
+    const [companyForm, setCompanyForm] = useState({});
 
     const recordsPerPage = 10;
 
@@ -25,6 +32,7 @@ const ViewData = () => {
             try {
                 const decoded = jwtDecode(token);
                 setAdminName(decoded.username || decoded.email || "Admin");
+                setAdminRole(decoded.role); // 👈 ADD THIS
             } catch (err) {
                 console.log(err);
             }
@@ -52,6 +60,163 @@ const ViewData = () => {
         });
         const data = await res.json();
         setCompanies(data);
+    };
+
+    const handleEdit = (emp) => {
+        setEditingId(emp._id);
+
+        setEditForm({
+            name: emp.name || "",
+            designation: emp.designation || "",
+            company: emp.company || "",
+            city: emp.city || "",
+            state: emp.state || "",
+            country: emp.country || "",
+            email: emp.email || "",
+            phone: emp.phone || "",
+            industry: emp.industry || "",
+            description: emp.description || "",
+        });
+    };
+
+    const handleDelete = async (id) => {
+        //console.log("DELETE ID 👉", id);
+        try {
+            const confirmDelete = window.confirm("Are you sure you want to delete?");
+            if (!confirmDelete) return;
+
+            const res = await fetch(`https://corpfinder-backend.onrender.com/employee/delete-by-all/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+                }
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg || "Delete failed ❌");
+                return;
+            }
+
+            alert("Employee deleted successfully ✅");
+
+            setEmpPage(1);
+            fetchAllEmployees();
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error ❌");
+        }
+    };
+
+    const handleUpdate = async () => {
+        try {
+            const res = await fetch(
+                `https://corpfinder-backend.onrender.com/employee/update-by-all/${editingId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+                    },
+                    body: JSON.stringify(editForm)
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg || "Update failed ❌");
+                return;
+            }
+
+            alert("Employee updated successfully ✅");
+
+            setEditingId(null);
+            fetchAllEmployees();  // refresh list
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error ❌");
+        }
+    };
+
+    const handleDeleteCompany = async (id) => {
+        try {
+            const confirmDelete = window.confirm("Delete this company?");
+            if (!confirmDelete) return;
+
+            const res = await fetch(
+                `https://corpfinder-backend.onrender.com/company/delete-by-all/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+                    }
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg || "Delete failed ❌");
+                return;
+            }
+
+            alert("Company deleted successfully ✅");
+
+            setCompPage(1);
+            fetchAllCompanies();
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error ❌");
+        }
+    };
+
+    const handleEditCompany = (company) => {
+        setEditingCompanyId(company._id);
+
+        setCompanyForm({
+            name: company.name || "",
+            city: company.city || "",
+            state: company.state || "",
+            country: company.country || "",
+            description: company.description || ""
+        });
+    };
+
+    const handleUpdateCompany = async () => {
+        try {
+            const res = await fetch(
+                `https://corpfinder-backend.onrender.com/company/update-by-all/${editingCompanyId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+                    },
+                    body: JSON.stringify(companyForm)
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg || "Update failed ❌");
+                return;
+            }
+
+            alert("Company updated successfully ✅");
+
+            setEditingCompanyId(null);
+            fetchAllCompanies();
+
+        } catch (err) {
+            console.log(err);
+            alert("Server error ❌");
+        }
     };
 
     // 🔍 SEARCH FILTER
@@ -137,6 +302,7 @@ const ViewData = () => {
                                         <th className="p-3 text-left">Email</th>
                                         <th className="p-3 text-left">Phone</th>
                                         <th className="p-3 text-left">Industry</th>
+                                        <th className="p-3 text-left">Action</th>
                                         <th className="p-3 text-left">Admin</th>
                                     </tr>
                                 </thead>
@@ -160,6 +326,30 @@ const ViewData = () => {
                                                 <td className="p-3">{emp.email}</td>
                                                 <td className="p-3">{emp.phone}</td>
                                                 <td className="p-3">{emp.industry}</td>
+                                                <td className="p-3 flex gap-2">
+
+                                                    {/* UPDATE BUTTON */}
+                                                    <button
+                                                        className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                        onClick={() => handleEdit(emp)}
+                                                    >
+                                                        Update
+                                                    </button>
+
+                                                    {/* DELETE BUTTON */}
+                                                    <button
+                                                        className={`px-2 py-1 text-xs rounded text-white
+            ${adminRole === "superadmin"
+                                                                ? "bg-red-500 hover:bg-red-600"
+                                                                : "bg-gray-400 cursor-not-allowed"
+                                                            }`}
+                                                        disabled={adminRole !== "superadmin"}
+                                                        onClick={() => handleDelete(emp._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+
+                                                </td>
                                                 <td className="p-3 text-blue-600 font-medium">
                                                     {emp.adminId?.username || "N/A"}
                                                 </td>
@@ -169,6 +359,95 @@ const ViewData = () => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {editingId && (
+                            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+
+                                <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg">
+
+                                    <h2 className="text-lg font-bold mb-4">Update Employee</h2>
+
+                                    <div className="grid grid-cols-2 gap-3">
+
+                                        <input
+                                            value={editForm.name}
+                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Name"
+                                        />
+
+                                        <input
+                                            value={editForm.designation}
+                                            onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Designation"
+                                        />
+
+                                        <input
+                                            value={editForm.company}
+                                            onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Company"
+                                        />
+
+                                        <input
+                                            value={editForm.city}
+                                            onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="City"
+                                        />
+
+                                        <input
+                                            value={editForm.state}
+                                            onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="State"
+                                        />
+
+                                        <input
+                                            value={editForm.country}
+                                            onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Country"
+                                        />
+
+                                        <input
+                                            value={editForm.email}
+                                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Email"
+                                        />
+
+                                        <input
+                                            value={editForm.phone}
+                                            onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Phone"
+                                        />
+
+                                    </div>
+
+                                    <div className="flex gap-2 mt-4">
+
+                                        <button
+                                            onClick={handleUpdate}
+                                            className="btn-primary w-full"
+                                        >
+                                            Update
+                                        </button>
+
+                                        <button
+                                            onClick={() => setEditingId(null)}
+                                            className="w-full border rounded"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
 
                         {/* PAGINATION */}
                         {/* 🔥 PROFESSIONAL PAGINATION */}
@@ -263,6 +542,7 @@ const ViewData = () => {
                                         <th className="p-3 text-left">State</th>
                                         <th className="p-3 text-left">Country</th>
                                         <th className="p-3 text-left">Description</th>
+                                        <th className="p-3 text-left">Action</th>
                                         <th className="p-3 text-left">Admin</th>
                                     </tr>
                                 </thead>
@@ -288,6 +568,28 @@ const ViewData = () => {
                                                             : c.description
                                                         : "-"}
                                                 </td>
+                                                <td className="p-3 flex gap-2">
+
+                                                    <button
+                                                        className="px-2 py-1 text-xs bg-blue-500 text-white rounded"
+                                                        onClick={() => handleEditCompany(c)}
+                                                    >
+                                                        Update
+                                                    </button>
+
+                                                    <button
+                                                        className={`px-2 py-1 text-xs rounded text-white
+    ${adminRole === "superadmin"
+                                                                ? "bg-red-500 hover:bg-red-600"
+                                                                : "bg-gray-400 cursor-not-allowed"
+                                                            }`}
+                                                        disabled={adminRole !== "superadmin"}
+                                                        onClick={() => handleDeleteCompany(c._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+
+                                                </td>
                                                 <td className="p-3 text-green-600 font-medium">
                                                     {c.adminId?.username || "N/A"}
                                                 </td>
@@ -297,6 +599,74 @@ const ViewData = () => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {editingCompanyId && (
+                            <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+
+                                <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg">
+
+                                    <h2 className="text-lg font-bold mb-4">Update Company</h2>
+
+                                    <div className="grid grid-cols-2 gap-3">
+
+                                        <input
+                                            value={companyForm.name}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Name"
+                                        />
+
+                                        <input
+                                            value={companyForm.city}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, city: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="City"
+                                        />
+
+                                        <input
+                                            value={companyForm.state}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, state: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="State"
+                                        />
+
+                                        <input
+                                            value={companyForm.country}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, country: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Country"
+                                        />
+
+                                        <input
+                                            value={companyForm.description}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, description: e.target.value })}
+                                            className="input-styled col-span-2"
+                                            placeholder="Description"
+                                        />
+
+                                    </div>
+
+                                    <div className="flex gap-2 mt-4">
+
+                                        <button
+                                            onClick={handleUpdateCompany}
+                                            className="btn-primary w-full"
+                                        >
+                                            Update
+                                        </button>
+
+                                        <button
+                                            onClick={() => setEditingCompanyId(null)}
+                                            className="w-full border rounded"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        )}
 
                         {/* 🔥 PROFESSIONAL PAGINATION - COMPANIES */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-4 border-t bg-gray-50">
