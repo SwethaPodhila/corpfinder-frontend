@@ -117,7 +117,7 @@ const AddEmployee = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/employee/add-employee", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employee/add-employee", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -194,7 +194,7 @@ const AddEmployee = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("http://localhost:5000/employee/upload-employees", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employee/upload-employees", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
@@ -461,7 +461,7 @@ const AddEmployee = () => {
 
                     </motion.div>
 
-                    
+
                     {popup.show && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
 

@@ -66,16 +66,19 @@ const ViewData = () => {
         setEditingId(emp._id);
 
         setEditForm({
-            name: emp.name || "",
+            first_name: emp.first_name || "",
+            last_name: emp.last_name || "",
             designation: emp.designation || "",
-            company: emp.company || "",
+            company_name: emp.company_name || "",
             city: emp.city || "",
             state: emp.state || "",
             country: emp.country || "",
-            email: emp.email || "",
+            personal_email: emp.personal_email || "",
+            business_email: emp.business_email || "",
             phone: emp.phone || "",
-            industry: emp.industry || "",
-            description: emp.description || "",
+            linkedin_id: emp.linkedin_id || "",
+            linkedin_url: emp.linkedin_url || "",
+            description: emp.description || ""
         });
     };
 
@@ -229,8 +232,13 @@ const ViewData = () => {
 
     // 🔍 SEARCH FILTER
     const filteredEmployees = employees.filter(emp =>
-        emp.name?.toLowerCase().includes(empSearch.toLowerCase()) ||
-        emp.company?.toLowerCase().includes(empSearch.toLowerCase())
+        (emp.first_name + " " + (emp.last_name || ""))
+            .toLowerCase()
+            .includes(empSearch.toLowerCase()) ||
+
+        emp.company_name?.toLowerCase().includes(empSearch.toLowerCase()) ||
+
+        emp.personal_email?.toLowerCase().includes(empSearch.toLowerCase())
     );
 
     const filteredCompanies = companies.filter(c =>
@@ -301,7 +309,7 @@ const ViewData = () => {
                             <table className="w-full min-w-[1000px] text-sm">
                                 <thead className="bg-gray-100 sticky top-0">
                                     <tr>
-                                        <th className="p-3 text-left">Name</th>
+                                        <th className="p-3 text-left">FullName</th>
                                         <th className="p-3 text-left">Company</th>
                                         <th className="p-3 text-left">City</th>
                                         <th className="p-3 text-left">State</th>
@@ -309,7 +317,6 @@ const ViewData = () => {
                                         <th className="p-3 text-left">Designation</th>
                                         <th className="p-3 text-left">Email</th>
                                         <th className="p-3 text-left">Phone</th>
-                                        <th className="p-3 text-left">Industry</th>
                                         <th className="p-3 text-left">Action</th>
                                         <th className="p-3 text-left">Admin</th>
                                     </tr>
@@ -318,25 +325,41 @@ const ViewData = () => {
                                 <tbody>
                                     {currentEmployees.length === 0 ? (
                                         <tr>
-                                            <td colSpan="4" className="text-center p-6 text-gray-500">
+                                            <td colSpan="10" className="text-center p-6 text-gray-500">
                                                 No employees found
                                             </td>
                                         </tr>
                                     ) : (
                                         currentEmployees.map(emp => (
                                             <tr key={emp._id} className="border-t hover:bg-gray-50">
-                                                <td className="p-3">{emp.name}</td>
-                                                <td className="p-3">{emp.company}</td>
+
+                                                {/* ✅ Name */}
+                                                <td className="p-3">
+                                                    {emp.first_name} {emp.last_name}
+                                                </td>
+
+                                                {/* ✅ Company */}
+                                                <td className="p-3">{emp.company_name}</td>
+
+                                                {/* ✅ Location */}
                                                 <td className="p-3">{emp.city}</td>
-                                                <td className="p-3">{emp.state}</td>
+                                                <td className="p-3">{emp.state || "-"}</td>
                                                 <td className="p-3">{emp.country}</td>
+
+                                                {/* ✅ Job */}
                                                 <td className="p-3">{emp.designation}</td>
-                                                <td className="p-3">{emp.email}</td>
-                                                <td className="p-3">{emp.phone}</td>
-                                                <td className="p-3">{emp.industry}</td>
+
+                                                {/* ✅ Email (priority personal → business) */}
+                                                <td className="p-3">
+                                                    {emp.personal_email || emp.business_email || "-"}
+                                                </td>
+
+                                                {/* ✅ Phone */}
+                                                <td className="p-3">{emp.phone || "-"}</td>
+
+                                                {/* ✅ Actions */}
                                                 <td className="p-3 flex gap-2">
 
-                                                    {/* UPDATE BUTTON */}
                                                     <button
                                                         className="px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
                                                         onClick={() => handleEdit(emp)}
@@ -344,10 +367,9 @@ const ViewData = () => {
                                                         Update
                                                     </button>
 
-                                                    {/* DELETE BUTTON */}
                                                     <button
                                                         className={`px-2 py-1 text-xs rounded text-white
-            ${adminRole === "superadmin"
+                ${adminRole === "superadmin"
                                                                 ? "bg-red-500 hover:bg-red-600"
                                                                 : "bg-gray-400 cursor-not-allowed"
                                                             }`}
@@ -358,9 +380,12 @@ const ViewData = () => {
                                                     </button>
 
                                                 </td>
+
+                                                {/* ✅ Admin */}
                                                 <td className="p-3 text-blue-600 font-medium">
                                                     {emp.adminId?.username || "N/A"}
                                                 </td>
+
                                             </tr>
                                         ))
                                     )}
@@ -371,66 +396,112 @@ const ViewData = () => {
                         {editingId && (
                             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 
-                                <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg">
+                                <div className="bg-white p-6 rounded-xl w-[600px] shadow-lg max-h-[90vh] overflow-y-auto">
 
                                     <h2 className="text-lg font-bold mb-4">Update Employee</h2>
 
                                     <div className="grid grid-cols-2 gap-3">
 
+                                        {/* First Name */}
                                         <input
-                                            value={editForm.name}
-                                            onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                            value={editForm.first_name || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
                                             className="input-styled"
-                                            placeholder="Name"
+                                            placeholder="First Name"
                                         />
 
+                                        {/* Last Name */}
                                         <input
-                                            value={editForm.designation}
+                                            value={editForm.last_name || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Last Name"
+                                        />
+
+                                        {/* Designation */}
+                                        <input
+                                            value={editForm.designation || ""}
                                             onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
                                             className="input-styled"
                                             placeholder="Designation"
                                         />
 
+                                        {/* Company */}
                                         <input
-                                            value={editForm.company}
-                                            onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                                            value={editForm.company_name || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })}
                                             className="input-styled"
                                             placeholder="Company"
                                         />
 
+                                        {/* City */}
                                         <input
-                                            value={editForm.city}
+                                            value={editForm.city || ""}
                                             onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
                                             className="input-styled"
                                             placeholder="City"
                                         />
 
+                                        {/* State */}
                                         <input
-                                            value={editForm.state}
+                                            value={editForm.state || ""}
                                             onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
                                             className="input-styled"
                                             placeholder="State"
                                         />
 
+                                        {/* Country */}
                                         <input
-                                            value={editForm.country}
+                                            value={editForm.country || ""}
                                             onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
                                             className="input-styled"
                                             placeholder="Country"
                                         />
 
+                                        {/* Personal Email */}
                                         <input
-                                            value={editForm.email}
-                                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                            value={editForm.personal_email || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, personal_email: e.target.value })}
                                             className="input-styled"
-                                            placeholder="Email"
+                                            placeholder="Personal Email"
                                         />
 
+                                        {/* Business Email */}
                                         <input
-                                            value={editForm.phone}
+                                            value={editForm.business_email || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, business_email: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Business Email"
+                                        />
+
+                                        {/* Phone */}
+                                        <input
+                                            value={editForm.phone || ""}
                                             onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                                             className="input-styled"
                                             placeholder="Phone"
+                                        />
+                                        <input
+                                            value={editForm.linkedin_id || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, linkedin_id: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="linkedin_id"
+                                        />
+
+                                        {/* LinkedIn URL */}
+                                        <input
+                                            value={editForm.linkedin_url || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="LinkedIn URL"
+                                        />
+
+                                        {/* Description */}
+                                        <textarea
+                                            value={editForm.description || ""}
+                                            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                            className="input-styled col-span-2"
+                                            placeholder="Description"
                                         />
 
                                     </div>

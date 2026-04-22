@@ -147,7 +147,7 @@ const AddCompany = () => {
 
     const handleUpdate = async () => {
         try {
-            const res = await fetch(`http://localhost:5000/company/update/${editData._id}`, {
+            const res = await fetch(`https://corpfinder-backend.onrender.com/company/update/${editData._id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -221,7 +221,7 @@ const AddCompany = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:5000/company/add-company", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/company/add-company", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -316,7 +316,7 @@ const AddCompany = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("http://localhost:5000/company/upload-companies", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/company/upload-companies", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}` // 🔥 MUST
@@ -445,6 +445,7 @@ const AddCompany = () => {
                             <input name="company_email" placeholder="Email" value={formData.company_email} onChange={handleChange} className="input-styled" />
 
                             <input name="company_linkedin_url" placeholder="LinkedIn URL" value={formData.company_linkedin_url} onChange={handleChange} className="input-styled" />
+
                             <input name="company_founded" placeholder="Founded Year (e.g. 2010)" value={formData.company_founded} onChange={handleChange} className="input-styled" />
 
                             <textarea
