@@ -21,6 +21,45 @@ const AddCompany = () => {
     const currentCompanies = companies.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(companies.length / itemsPerPage);
 
+    const getPagination = () => {
+        const pages = [];
+        const maxVisible = 5; // how many pages to show
+
+        let start = Math.max(1, currentPage - 2);
+        let end = Math.min(totalPages, currentPage + 2);
+
+        // adjust if near start
+        if (currentPage <= 3) {
+            start = 1;
+            end = Math.min(totalPages, maxVisible);
+        }
+
+        // adjust if near end
+        if (currentPage >= totalPages - 2) {
+            start = Math.max(1, totalPages - maxVisible + 1);
+            end = totalPages;
+        }
+
+        // first page + dots
+        if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push("...");
+        }
+
+        // middle pages
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        // last page + dots
+        if (end < totalPages) {
+            if (end < totalPages - 1) pages.push("...");
+            pages.push(totalPages);
+        }
+
+        return pages;
+    };
+
     const token = localStorage.getItem("adminToken");
 
     const [popup, setPopup] = useState({
@@ -30,11 +69,19 @@ const AddCompany = () => {
     });
 
     const [formData, setFormData] = useState({
-        name: "",
-        country: "",
-        state: "",
-        city: "",
-        description: ""
+        company_name: "",
+        company_type: "",
+        company_industry: "",
+        company_address: "",
+        company_website: "",
+        company_city: "",
+        company_state: "",
+        company_country: "",
+        company_phone: "",
+        company_email: "",
+        company_linkedin_url: "",
+        company_founded: "",  // ✅ added founded year
+        company_description: ""   // ✅ added description field
     });
 
     const [file, setFile] = useState(null);
@@ -100,7 +147,7 @@ const AddCompany = () => {
 
     const handleUpdate = async () => {
         try {
-            const res = await fetch(`https://corpfinder-backend.onrender.com/company/update/${editData._id}`, {
+            const res = await fetch(`http://localhost:5000/company/update/${editData._id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -161,20 +208,20 @@ const AddCompany = () => {
 
         setLoading(true);
 
-        const { name, country, state, city } = formData;
+        const { company_name, company_type, company_industry } = formData;
 
-        if (!name || !country || !state || !city) {
+        if (!company_name || !company_type || !company_industry) {
             setPopup({
                 show: true,
                 type: "error",
-                message: "Please fill all required fields ❗"
+                message: "Please fill required fields ❗ (Name, Type, Industry)"
             });
             setLoading(false);
             return;
         }
 
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/company/add-company", {
+            const res = await fetch("http://localhost:5000/company/add-company", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -202,11 +249,19 @@ const AddCompany = () => {
             });
 
             setFormData({
-                name: "",
-                country: "",
-                state: "",
-                city: "",
-                description: ""
+                company_name: "",
+                company_type: "",
+                company_industry: "",
+                company_address: "",
+                company_website: "",
+                company_city: "",
+                company_state: "",
+                company_country: "",
+                company_phone: "",
+                company_email: "",
+                company_linkedin_url: "",
+                company_founded: "",  // ✅
+                company_description: ""   // ✅
             });
 
         } catch (err) {
@@ -261,7 +316,7 @@ const AddCompany = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/company/upload-companies", {
+            const res = await fetch("http://localhost:5000/company/upload-companies", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}` // 🔥 MUST
@@ -369,14 +424,36 @@ const AddCompany = () => {
 
                         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            <input name="name" placeholder="Company Name *" value={formData.name} onChange={handleChange} className="input-styled" required />
-                            <input name="country" placeholder="Country *" value={formData.country} onChange={handleChange} className="input-styled" required />
-                            <input name="state" placeholder="State *" value={formData.state} onChange={handleChange} className="input-styled" required />
-                            <input name="city" placeholder="City *" value={formData.city} onChange={handleChange} className="input-styled" required />
+                            <input name="company_name" placeholder="Company Name *" value={formData.company_name} onChange={handleChange} className="input-styled" />
 
-                            <div className="md:col-span-2">
-                                <input name="description" placeholder="Description (Optional)" value={formData.description} onChange={handleChange} className="input-styled" />
-                            </div>
+                            <input name="company_type" placeholder="Company Type *" value={formData.company_type} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_industry" placeholder="Industry *" value={formData.company_industry} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_city" placeholder="City" value={formData.company_city} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_state" placeholder="State" value={formData.company_state} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_country" placeholder="Country" value={formData.company_country} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_address" placeholder="Address" value={formData.company_address} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_website" placeholder="Website" value={formData.company_website} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_phone" placeholder="Phone" value={formData.company_phone} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_email" placeholder="Email" value={formData.company_email} onChange={handleChange} className="input-styled" />
+
+                            <input name="company_linkedin_url" placeholder="LinkedIn URL" value={formData.company_linkedin_url} onChange={handleChange} className="input-styled" />
+                            <input name="company_founded" placeholder="Founded Year (e.g. 2010)" value={formData.company_founded} onChange={handleChange} className="input-styled" />
+
+                            <textarea
+                                name="company_description"
+                                placeholder="Company Description (Optional)"
+                                value={formData.company_description}
+                                onChange={handleChange}
+                                className="input-styled md:col-span-2"
+                            />
 
                             <div className="md:col-span-2">
                                 <button className="btn-primary w-full" disabled={loading}>
@@ -428,28 +505,39 @@ const AddCompany = () => {
                         <p className="text-xs text-gray-400 mt-3 text-center">
                             Format: company name, city, state, country
                         </p>
-                        
+
                     </motion.div>
 
                     {/* 🔥 POPUP */}
                     {popup.show && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                            <div className="bg-white rounded-xl shadow-lg w-[400px] max-h-[80vh] overflow-auto p-5">
 
-                                <h2 className={`text-lg font-bold mb-3 ${popup.type === "error" ? "text-red-600" : "text-green-600"}`}>
-                                    {popup.type === "error" ? "❌ Error" : "✅ Success"}
-                                </h2>
+                            <div className="bg-white rounded-xl shadow-lg w-[400px] max-h-[80vh] flex flex-col">
 
-                                <pre className="text-sm whitespace-pre-wrap text-gray-700">
-                                    {popup.message}
-                                </pre>
+                                {/* HEADER */}
+                                <div className="p-5 border-b">
+                                    <h2 className={`text-lg font-bold ${popup.type === "error" ? "text-red-600" : "text-green-600"}`}>
+                                        {popup.type === "error" ? "❌ Error" : "✅ Success"}
+                                    </h2>
+                                </div>
 
-                                <button
-                                    onClick={() => setPopup({ show: false, type: "", message: "" })}
-                                    className="btn-primary mt-5 w-full"
-                                >
-                                    OK
-                                </button>
+                                {/* SCROLLABLE CONTENT */}
+                                <div className="p-5 overflow-y-auto flex-1">
+                                    <pre className="text-sm whitespace-pre-wrap text-gray-700">
+                                        {popup.message}
+                                    </pre>
+                                </div>
+
+                                {/* FIXED FOOTER */}
+                                <div className="p-4 border-t bg-white">
+                                    <button
+                                        onClick={() => setPopup({ show: false, type: "", message: "" })}
+                                        className="btn-primary w-full"
+                                    >
+                                        OK
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     )}
@@ -471,10 +559,16 @@ const AddCompany = () => {
                                 <thead className="bg-gray-100 text-gray-700">
                                     <tr>
                                         <th className="p-3 text-left">Name</th>
+                                        <th className="p-3 text-left">Type</th>
+                                        <th className="p-3 text-left">Industry</th>
                                         <th className="p-3 text-left">City</th>
                                         <th className="p-3 text-left">State</th>
                                         <th className="p-3 text-left">Country</th>
-                                        <th className="p-3 text-left">Description</th>
+                                        <th className="p-3 text-left">Email</th>
+                                        <th className="p-3 text-left">Phone</th>
+                                        <th className="p-3 text-left">Website</th>
+                                        <th className="p-3 text-left">Founded</th>
+                                        <th className="p-3 text-left">Address</th>
                                         <th className="p-3 text-center">Actions</th>
                                     </tr>
                                 </thead>
@@ -506,16 +600,17 @@ const AddCompany = () => {
                                             {/* DATA ROWS */}
                                             {currentCompanies.map((c) => (
                                                 <tr key={c._id} className="border-t hover:bg-gray-50">
-                                                    <td className="p-3">{c.name}</td>
-                                                    <td className="p-3">{c.city}</td>
-                                                    <td className="p-3">{c.state}</td>
-                                                    <td className="p-3">{c.country}</td>
-
-                                                    <td className="p-3 text-gray-600">
-                                                        {c.description?.length > 100
-                                                            ? c.description.slice(0, 100) + "..."
-                                                            : c.description || "-"}
-                                                    </td>
+                                                    <td className="p-3">{c.company_name}</td>
+                                                    <td className="p-3">{c.company_type}</td>
+                                                    <td className="p-3">{c.company_industry}</td>
+                                                    <td className="p-3">{c.company_city || "-"}</td>
+                                                    <td className="p-3">{c.company_state || "-"}</td>
+                                                    <td className="p-3">{c.company_country || "-"}</td>
+                                                    <td className="p-3">{c.company_email || "-"}</td>
+                                                    <td className="p-3">{c.company_phone || "-"}</td>
+                                                    <td className="p-3">{c.company_website || "-"}</td>
+                                                    <td className="p-3">{c.company_founded || "-"}</td>
+                                                    <td className="p-3">{c.company_address || "-"}</td>
 
                                                     <td className="p-3 flex gap-2 justify-center">
                                                         <button
@@ -524,13 +619,14 @@ const AddCompany = () => {
                                                         >
                                                             Edit
                                                         </button>
+
                                                         <button
                                                             onClick={() => {
                                                                 if (userRole !== "superadmin") {
                                                                     setPopup({
                                                                         show: true,
                                                                         type: "error",
-                                                                        message: "❌ You don't have permission to delete companies"
+                                                                        message: "❌ You don't have permission"
                                                                     });
                                                                     return;
                                                                 }
@@ -538,7 +634,7 @@ const AddCompany = () => {
                                                             }}
                                                             className={`px-3 py-1 rounded text-white ${userRole !== "superadmin"
                                                                 ? "bg-red-300 cursor-not-allowed"
-                                                                : "bg-red-500 hover:bg-red-600"
+                                                                : "bg-red-500"
                                                                 }`}
                                                         >
                                                             Delete
@@ -553,54 +649,168 @@ const AddCompany = () => {
 
                             </table>
                         </div>
+
+                        <div className="flex justify-center items-center gap-2 p-4">
+
+                            <button
+                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(currentPage - 1)}
+                            >
+                                Prev
+                            </button>
+
+                            {getPagination().map((page, index) => (
+                                <button
+                                    key={index}
+                                    disabled={page === "..."}
+                                    onClick={() => page !== "..." && setCurrentPage(page)}
+                                    className={`px-3 py-1 rounded ${currentPage === page
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-200"
+                                        } ${page === "..." ? "cursor-default" : ""}`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            <button
+                                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(currentPage + 1)}
+                            >
+                                Next
+                            </button>
+
+                        </div>
+
                     </div>
 
                     {editData && (
-                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                            <div className="bg-white p-6 rounded-xl w-[400px]">
+                        <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
 
-                                <h2 className="text-lg font-bold mb-4">Update Company</h2>
+                            <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl p-6 max-h-[90vh] overflow-y-auto">
 
-                                <input
-                                    value={editData.name}
-                                    onChange={(e) =>
-                                        setEditData({ ...editData, name: e.target.value })
-                                    }
-                                    className="input-styled mb-2"
-                                />
+                                {/* HEADER */}
+                                <div className="flex justify-between items-center mb-4 border-b pb-2">
+                                    <h2 className="text-xl font-semibold">Update Company</h2>
+                                    <button
+                                        onClick={() => setEditData(null)}
+                                        className="text-gray-500 hover:text-red-500 text-lg"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
 
-                                <input
-                                    value={editData.city}
-                                    onChange={(e) =>
-                                        setEditData({ ...editData, city: e.target.value })
-                                    }
-                                    className="input-styled mb-2"
-                                />
+                                {/* FORM */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                                <input
-                                    value={editData.state}
-                                    onChange={(e) =>
-                                        setEditData({ ...editData, state: e.target.value })
-                                    }
-                                    className="input-styled mb-2"
-                                />
+                                    <input
+                                        value={editData.company_name || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_name: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Company Name *"
+                                    />
 
-                                <textarea
-                                    value={editData.description}
-                                    onChange={(e) =>
-                                        setEditData({ ...editData, description: e.target.value })
-                                    }
-                                    className="input-styled mb-2"
-                                />
+                                    <input
+                                        value={editData.company_type || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_type: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Company Type *"
+                                    />
 
-                                <div className="flex gap-2 mt-4">
-                                    <button onClick={handleUpdate} className="btn-primary w-full">
+                                    <input
+                                        value={editData.company_industry || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_industry: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Industry *"
+                                    />
+
+                                    <input
+                                        value={editData.company_founded || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_founded: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Founded Year (e.g. 2010)"
+                                    />
+
+                                    <input
+                                        value={editData.company_city || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_city: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="City"
+                                    />
+
+                                    <input
+                                        value={editData.company_state || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_state: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="State"
+                                    />
+
+                                    <input
+                                        value={editData.company_country || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_country: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Country"
+                                    />
+
+                                    <input
+                                        value={editData.company_email || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_email: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Email"
+                                    />
+
+                                    <input
+                                        value={editData.company_phone || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_phone: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Phone"
+                                    />
+
+                                    <input
+                                        value={editData.company_website || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_website: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Website"
+                                    />
+
+                                    <input
+                                        value={editData.company_linkedin_url || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_linkedin_url: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="LinkedIn URL"
+                                    />
+
+                                    {/* FULL WIDTH */}
+                                    <input
+                                        value={editData.company_address || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_address: e.target.value })}
+                                        className="input-styled"
+                                        placeholder="Full Address"
+                                    />
+
+                                    <textarea
+                                        value={editData.company_description || ""}
+                                        onChange={(e) => setEditData({ ...editData, company_description: e.target.value })}
+                                        className="input-styled md:col-span-2"
+                                        placeholder="Company Description"
+                                    />
+
+                                </div>
+
+                                {/* ACTIONS */}
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={handleUpdate}
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl"
+                                    >
                                         Update
                                     </button>
 
                                     <button
                                         onClick={() => setEditData(null)}
-                                        className="w-full bg-gray-300 rounded"
+                                        className="flex-1 bg-gray-200 hover:bg-gray-300 py-2 rounded-xl"
                                     >
                                         Cancel
                                     </button>
@@ -610,41 +820,10 @@ const AddCompany = () => {
                         </div>
                     )}
 
-
-                    <div className="flex justify-center items-center gap-2 p-4">
-
-                        <button
-                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(currentPage - 1)}
-                        >
-                            Prev
-                        </button>
-
-                        {Array.from({ length: totalPages }, (_, i) => (
-                            <button
-                                key={i}
-                                onClick={() => setCurrentPage(i + 1)}
-                                className={`px-3 py-1 rounded ${currentPage === i + 1
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-200"
-                                    }`}
-                            >
-                                {i + 1}
-                            </button>
-                        ))}
-
-                        <button
-                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                        >
-                            Next
-                        </button>
-
-                    </div>
-
                 </main>
+
+
+
             </div>
         </div>
     );

@@ -61,15 +61,18 @@ const AddEmployee = () => {
     }, []);
 
     const [formData, setFormData] = useState({
-        name: "",
+        first_name: "",
+        last_name: "",
         designation: "",
-        company: "",
+        company_name: "",
         city: "",
         state: "",
         country: "",
-        email: "",
+        personal_email: "",
+        business_email: "",
         phone: "",
-        industry: "",
+        linkedin_id: "",
+        linkedin_url: "",
         description: "",
     });
 
@@ -105,16 +108,16 @@ const AddEmployee = () => {
         setError("");
         setMessage("");
 
-        const { name, designation, company, city, state, country } = formData;
+        const { first_name, designation, company_name, city, state, country } = formData;
 
-        if (!name || !designation || !company || !city || !state || !country) {
+        if (!first_name || !designation || !company_name || !city || !state || !country) {
             setError("Please fill all required fields ❗");
             setLoading(false);
             return;
         }
 
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/employee/add-employee", {
+            const res = await fetch("http://localhost:5000/employee/add-employee", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -132,17 +135,19 @@ const AddEmployee = () => {
             }
 
             alert("Employee added successfully ✅");
-
             setFormData({
-                name: "",
+                first_name: "",
+                last_name: "",
                 designation: "",
-                company: "",
+                company_name: "",
                 city: "",
                 state: "",
                 country: "",
-                email: "",
+                personal_email: "",
+                business_email: "",
                 phone: "",
-                industry: "",
+                linkedin_id: "",
+                linkedin_url: "",
                 description: "",
             });
 
@@ -189,7 +194,7 @@ const AddEmployee = () => {
         formData.append("file", file);
 
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/employee/upload-employees", {
+            const res = await fetch("http://localhost:5000/employee/upload-employees", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
@@ -371,22 +376,32 @@ const AddEmployee = () => {
 
                         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                            <input name="name" placeholder="Full Name *" value={formData.name} onChange={handleChange} className="input-styled" required />
+                            <input name="first_name" placeholder="First Name *" value={formData.first_name} onChange={handleChange} className="input-styled" required />
+
+                            <input name="last_name" placeholder="Last Name" value={formData.last_name} onChange={handleChange} className="input-styled" />
+
                             <input name="designation" placeholder="Designation *" value={formData.designation} onChange={handleChange} className="input-styled" required />
-                            <input name="company" placeholder="Company *" value={formData.company} onChange={handleChange} className="input-styled" required />
+
+                            <input name="company_name" placeholder="Company Name *" value={formData.company_name} onChange={handleChange} className="input-styled" required />
+
                             <input name="city" placeholder="City *" value={formData.city} onChange={handleChange} className="input-styled" required />
+
                             <input name="state" placeholder="State *" value={formData.state} onChange={handleChange} className="input-styled" required />
+
                             <input name="country" placeholder="Country *" value={formData.country} onChange={handleChange} className="input-styled" required />
 
-                            <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="input-styled" />
+                            <input name="personal_email" placeholder="Personal Email" value={formData.personal_email} onChange={handleChange} className="input-styled" />
+
+                            <input name="business_email" placeholder="Business Email" value={formData.business_email} onChange={handleChange} className="input-styled" />
+
                             <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="input-styled" />
 
-                            <div className="md:col-span-2">
-                                <input name="industry" placeholder="Industry" value={formData.industry} onChange={handleChange} className="input-styled" />
-                            </div>
+                            <input name="linkedin_id" placeholder="LinkedIn ID" value={formData.linkedin_id} onChange={handleChange} className="input-styled" />
+
+                            <input name="linkedin_url" placeholder="LinkedIn URL" value={formData.linkedin_url} onChange={handleChange} className="input-styled" />
 
                             <div className="md:col-span-2">
-                                <input name="description" placeholder="description..." value={formData.description} onChange={handleChange} className="input-styled" />
+                                <input name="description" placeholder="Description..." value={formData.description} onChange={handleChange} className="input-styled" />
                             </div>
 
                             <div className="md:col-span-2">
@@ -445,25 +460,40 @@ const AddEmployee = () => {
                         </p>
 
                     </motion.div>
+
+                    
                     {popup.show && (
                         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                            <div className="bg-white rounded-xl shadow-lg w-[400px] max-h-[80vh] overflow-auto p-5">
 
-                                <h2 className={`text-lg font-bold mb-3 ${popup.type === "error" ? "text-red-600" : "text-green-600"
-                                    }`}>
-                                    {popup.type === "error" ? "❌ Upload Failed" : "✅ Upload Success"}
-                                </h2>
+                            <div className="bg-white rounded-xl shadow-lg w-[400px] max-h-[80vh] flex flex-col">
 
-                                <pre className="text-sm whitespace-pre-wrap text-gray-700">
-                                    {popup.message}
-                                </pre>
+                                {/* 🔹 HEADER */}
+                                <div className="p-5 border-b">
+                                    <h2
+                                        className={`text-lg font-bold ${popup.type === "error" ? "text-red-600" : "text-green-600"
+                                            }`}
+                                    >
+                                        {popup.type === "error" ? "❌ Upload Failed" : "✅ Upload Success"}
+                                    </h2>
+                                </div>
 
-                                <button
-                                    onClick={() => setPopup({ show: false, type: "", message: "" })}
-                                    className="btn-primary mt-5 w-full"
-                                >
-                                    OK
-                                </button>
+                                {/* 🔹 SCROLLABLE CONTENT */}
+                                <div className="p-5 overflow-y-auto flex-1">
+                                    <pre className="text-sm whitespace-pre-wrap text-gray-700">
+                                        {popup.message}
+                                    </pre>
+                                </div>
+
+                                {/* 🔹 FIXED FOOTER */}
+                                <div className="p-4 border-t bg-white">
+                                    <button
+                                        onClick={() => setPopup({ show: false, type: "", message: "" })}
+                                        className="btn-primary w-full"
+                                    >
+                                        OK
+                                    </button>
+                                </div>
+
                             </div>
                         </div>
                     )}
@@ -495,13 +525,15 @@ const AddEmployee = () => {
 
                                     <thead className="bg-gray-100 text-left">
                                         <tr>
-                                            <th className="p-3">Name</th>
+                                            <th className="p-3">First Name</th>
+                                            <th className="p-3">Last Name</th>
                                             <th className="p-3">Designation</th>
                                             <th className="p-3">Company</th>
                                             <th className="p-3">City</th>
                                             <th className="p-3">State</th>
                                             <th className="p-3">Country</th>
-                                            <th className="p-3">Email</th>
+                                            <th className="p-3">Personal Email</th>
+                                            <th className="p-3">Business Email</th>
                                             <th className="p-3">Phone</th>
                                             <th className="p-3">Actions</th>
                                         </tr>
@@ -511,13 +543,15 @@ const AddEmployee = () => {
                                         {currentEmployees.map(emp => (
                                             <tr key={emp._id} className="border-b hover:bg-gray-50">
 
-                                                <td className="p-3">{emp.name}</td>
+                                                <td className="p-3">{emp.first_name}</td>
+                                                <td className="p-3">{emp.last_name}</td>
                                                 <td className="p-3">{emp.designation}</td>
-                                                <td className="p-3">{emp.company}</td>
+                                                <td className="p-3">{emp.company_name}</td>
                                                 <td className="p-3">{emp.city}</td>
                                                 <td className="p-3">{emp.state}</td>
                                                 <td className="p-3">{emp.country}</td>
-                                                <td className="p-3">{emp.email}</td>
+                                                <td className="p-3">{emp.personal_email}</td>
+                                                <td className="p-3">{emp.business_email}</td>
                                                 <td className="p-3">{emp.phone}</td>
 
                                                 <td className="p-3 flex gap-2 justify-center">
@@ -622,60 +656,80 @@ const AddEmployee = () => {
                 {editingId && (
                     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 
-                        <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg max-h-[90vh] overflow-y-auto">
+                        <div className="bg-white p-6 rounded-xl w-[700px] shadow-lg max-h-[90vh] overflow-y-auto">
 
-                            <h2 className="text-lg font-bold mb-4">Edit Employee</h2>
+                            <h2 className="text-lg font-bold mb-2">Edit Employee</h2>
+                            <p className="text-xs text-gray-500 mb-4">
+                                Fields marked with * are required
+                            </p>
 
-                            {/* GRID FORM */}
+                            {/* FORM */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
+                                {/* 🔴 REQUIRED */}
                                 <input
-                                    value={editForm.name || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                    value={editForm.first_name || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
                                     className="input-styled"
-                                    placeholder="Name"
+                                    placeholder="First Name *"
+                                />
+
+                                <input
+                                    value={editForm.last_name || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                                    className="input-styled"
+                                    placeholder="Last Name"
                                 />
 
                                 <input
                                     value={editForm.designation || ""}
                                     onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
                                     className="input-styled"
-                                    placeholder="Designation"
+                                    placeholder="Designation *"
                                 />
 
                                 <input
-                                    value={editForm.company || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                                    value={editForm.company_name || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, company_name: e.target.value })}
                                     className="input-styled"
-                                    placeholder="Company"
+                                    placeholder="Company Name *"
                                 />
 
                                 <input
                                     value={editForm.city || ""}
                                     onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
                                     className="input-styled"
-                                    placeholder="City"
+                                    placeholder="City *"
                                 />
 
                                 <input
                                     value={editForm.state || ""}
                                     onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
                                     className="input-styled"
-                                    placeholder="State"
+                                    placeholder="State *"
                                 />
 
                                 <input
                                     value={editForm.country || ""}
                                     onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
                                     className="input-styled"
-                                    placeholder="Country"
+                                    placeholder="Country *"
+                                />
+
+                                {/* 🟡 OPTIONAL */}
+
+                                <input
+                                    value={editForm.personal_email || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, personal_email: e.target.value })}
+                                    className="input-styled"
+                                    placeholder="Personal Email"
                                 />
 
                                 <input
-                                    value={editForm.email || ""}
-                                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                    value={editForm.business_email || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, business_email: e.target.value })}
                                     className="input-styled"
-                                    placeholder="Email"
+                                    placeholder="Business Email"
                                 />
 
                                 <input
@@ -685,14 +739,19 @@ const AddEmployee = () => {
                                     placeholder="Phone"
                                 />
 
-                                <div className="md:col-span-2">
-                                    <input
-                                        value={editForm.industry || ""}
-                                        onChange={(e) => setEditForm({ ...editForm, industry: e.target.value })}
-                                        className="input-styled"
-                                        placeholder="Industry"
-                                    />
-                                </div>
+                                <input
+                                    value={editForm.linkedin_id || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, linkedin_id: e.target.value })}
+                                    className="input-styled"
+                                    placeholder="LinkedIn ID"
+                                />
+
+                                <input
+                                    value={editForm.linkedin_url || ""}
+                                    onChange={(e) => setEditForm({ ...editForm, linkedin_url: e.target.value })}
+                                    className="input-styled"
+                                    placeholder="LinkedIn URL"
+                                />
 
                                 <div className="md:col-span-2">
                                     <textarea
@@ -725,6 +784,7 @@ const AddEmployee = () => {
                         </div>
                     </div>
                 )}
+
             </div>
         </div>
     );

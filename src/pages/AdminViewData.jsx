@@ -179,11 +179,19 @@ const ViewData = () => {
         setEditingCompanyId(company._id);
 
         setCompanyForm({
-            name: company.name || "",
-            city: company.city || "",
-            state: company.state || "",
-            country: company.country || "",
-            description: company.description || ""
+            company_name: company.company_name || "",
+            company_type: company.company_type || "",
+            company_industry: company.company_industry || "",
+            company_city: company.company_city || "",
+            company_state: company.company_state || "",
+            company_country: company.company_country || "",
+            company_email: company.company_email || "",
+            company_phone: company.company_phone || "",
+            company_website: company.company_website || "",
+            company_linkedin_url: company.company_linkedin_url || "",
+            company_founded: company.company_founded || "",
+            company_address: company.company_address || "",
+            company_description: company.company_description || ""
         });
     };
 
@@ -226,8 +234,8 @@ const ViewData = () => {
     );
 
     const filteredCompanies = companies.filter(c =>
-        c.name?.toLowerCase().includes(compSearch.toLowerCase()) ||
-        c.city?.toLowerCase().includes(compSearch.toLowerCase())
+        c.company_name?.toLowerCase().includes(compSearch.toLowerCase()) ||
+        c.company_city?.toLowerCase().includes(compSearch.toLowerCase())
     );
 
     // 📄 PAGINATION
@@ -513,6 +521,7 @@ const ViewData = () => {
                     </div>
 
                     {/* 🔥 COMPANIES */}
+
                     <div className="bg-white rounded-2xl shadow-md border">
 
                         <div className="p-4 border-b flex justify-between items-center">
@@ -538,12 +547,22 @@ const ViewData = () => {
                                 <thead className="bg-gray-100 sticky top-0">
                                     <tr>
                                         <th className="p-3 text-left">Name</th>
+                                        <th className="p-3 text-left">Type</th>
+                                        <th className="p-3 text-left">Industry</th>
                                         <th className="p-3 text-left">City</th>
                                         <th className="p-3 text-left">State</th>
                                         <th className="p-3 text-left">Country</th>
+                                        <th className="p-3 text-left">Email</th>
+                                        <th className="p-3 text-left">Phone</th>
+                                        <th className="p-3 text-left">Website</th>
+
+                                        <th className="p-3 text-left">linkedin url</th>
+                                        <th className="p-3 text-left">Founded</th>
+                                        <th className="p-3 text-left">Address</th>
                                         <th className="p-3 text-left">Description</th>
                                         <th className="p-3 text-left">Action</th>
                                         <th className="p-3 text-left">Admin</th>
+
                                     </tr>
                                 </thead>
 
@@ -557,17 +576,26 @@ const ViewData = () => {
                                     ) : (
                                         currentCompanies.map(c => (
                                             <tr key={c._id} className="border-t hover:bg-gray-50">
-                                                <td className="p-3">{c.name}</td>
-                                                <td className="p-3">{c.city}</td>
-                                                <td className="p-3">{c.state}</td>
-                                                <td className="p-3">{c.country}</td>
+                                                <td className="p-3">{c.company_name}</td>
+                                                <td className="p-3">{c.company_type}</td>
+                                                <td className="p-3">{c.company_industry}</td>
+                                                <td className="p-3">{c.company_city}</td>
+                                                <td className="p-3">{c.company_state}</td>
+                                                <td className="p-3">{c.company_country}</td>
+                                                <td className="p-3">{c.company_email || "-"}</td>
+                                                <td className="p-3">{c.company_phone || "-"}</td>
+                                                <td className="p-3">{c.company_website || "-"}</td>
+                                                <td className="p-3">{c.company_linkedin_url || "-"}</td>
+                                                <td className="p-3">{c.company_founded || "-"}</td>
+                                                <td className="p-3">{c.company_address || "-"}</td>
                                                 <td className="p-3 text-gray-600">
-                                                    {c.description
-                                                        ? c.description.length > 50
-                                                            ? c.description.substring(0, 50) + "..."
-                                                            : c.description
+                                                    {c.company_description
+                                                        ? c.company_description.length > 50
+                                                            ? c.company_description.substring(0, 50) + "..."
+                                                            : c.company_description
                                                         : "-"}
                                                 </td>
+
                                                 <td className="p-3 flex gap-2">
 
                                                     <button
@@ -603,43 +631,99 @@ const ViewData = () => {
                         {editingCompanyId && (
                             <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
 
-                                <div className="bg-white p-6 rounded-xl w-[500px] shadow-lg">
+                                <div className="bg-white p-6 rounded-xl w-[700px] shadow-lg">
 
                                     <h2 className="text-lg font-bold mb-4">Update Company</h2>
 
                                     <div className="grid grid-cols-2 gap-3">
 
                                         <input
-                                            value={companyForm.name}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                                            value={companyForm.company_name || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_name: e.target.value })}
                                             className="input-styled"
-                                            placeholder="Name"
+                                            placeholder="Company Name"
                                         />
 
                                         <input
-                                            value={companyForm.city}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, city: e.target.value })}
+                                            value={companyForm.company_type || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_type: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Type"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_industry || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_industry: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Industry"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_city || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_city: e.target.value })}
                                             className="input-styled"
                                             placeholder="City"
                                         />
 
                                         <input
-                                            value={companyForm.state}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, state: e.target.value })}
+                                            value={companyForm.company_state || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_state: e.target.value })}
                                             className="input-styled"
                                             placeholder="State"
                                         />
 
                                         <input
-                                            value={companyForm.country}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, country: e.target.value })}
+                                            value={companyForm.company_country || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_country: e.target.value })}
                                             className="input-styled"
                                             placeholder="Country"
                                         />
 
                                         <input
-                                            value={companyForm.description}
-                                            onChange={(e) => setCompanyForm({ ...companyForm, description: e.target.value })}
+                                            value={companyForm.company_email || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_email: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Email"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_phone || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_phone: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Phone"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_website || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_website: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Website"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_linkedin_url || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_linkedin_url: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="LinkedIn URL"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_founded || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_founded: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Founded Year"
+                                        />
+
+                                        <input
+                                            value={companyForm.company_address || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_address: e.target.value })}
+                                            className="input-styled"
+                                            placeholder="Address"
+                                        />
+
+                                        <textarea
+                                            value={companyForm.company_description || ""}
+                                            onChange={(e) => setCompanyForm({ ...companyForm, company_description: e.target.value })}
                                             className="input-styled col-span-2"
                                             placeholder="Description"
                                         />
