@@ -332,142 +332,133 @@ const SearchPage = () => {
             </div>
 
             {/* RESULTS TABLE */}
+            {/* RESULTS TABLE */}
             <div className="mt-6 bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
 
                 {!searched ? (
                     <div className="flex flex-col items-center justify-center mt-20 text-gray-600 mb-20">
-
                         <div className="bg-gray-100 p-4 rounded-full mb-4">
                             <SearchIcon size={28} className="text-gray-500" />
                         </div>
 
                         <p className="text-xl font-semibold">Start searching</p>
-
-                        <p className="text-sm text-gray-400 mt-1 ">
+                        <p className="text-sm text-gray-400 mt-1">
                             Search people or companies by name, role, or location
                         </p>
-
                     </div>
+
                 ) : loading ? (
                     <div className="text-center mt-20 flex flex-col items-center gap-3 mb-20">
-
-                        {/* Spinner */}
                         <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        {/* Text */}
-                        <p className="text-lg font-semibold text-gray-700">
-                            Searching...
-                        </p>
-                        <p className="text-sm text-gray-400">
-                            We’re fetching the best results for you
-                        </p>
-
+                        <p className="text-lg font-semibold text-gray-700">Searching...</p>
                     </div>
+
                 ) : paged.length === 0 ? (
                     <div className="text-center py-20 flex flex-col items-center">
-
-                        {/* Icon */}
                         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-4">
                             <span className="text-2xl">🔍</span>
                         </div>
-
-                        {/* Title */}
-                        <p className="text-xl font-semibold text-gray-700">
-                            No results found
-                        </p>
-
-                        {/* Subtitle */}
-                        <p className="text-sm text-gray-400 mt-2 max-w-sm">
-                            We couldn’t find anything matching your search. Try different keywords or adjust your filters.
-                        </p>
-
-                        {/* Action Button */}
-                        <button
-                            onClick={() => {
-                                setQuery("");
-                                setFilters({
-                                    industry: "",
-                                    designation: "",
-                                    country: "",
-                                    state: "",
-                                    city: ""
-                                });
-                            }}
-                            className="mt-5 px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
-                        >
-                            Clear Filters
-                        </button>
-
+                        <p className="text-xl font-semibold text-gray-700">No results found</p>
                     </div>
 
-                ) : (
+                ) : tab === "people" ? (
+
+                    /* ================= PEOPLE TABLE ================= */
                     <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
 
-                        {/* HEADER */}
-                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 text-xs uppercase tracking-wide">
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
                             <tr>
                                 <th className="p-3 border">Name</th>
                                 <th className="p-3 border">Designation</th>
                                 <th className="p-3 border">Company</th>
-
-                                <th className="p-3 border">Industry</th>
                                 <th className="p-3 border">City</th>
                                 <th className="p-3 border">State</th>
                                 <th className="p-3 border">Country</th>
+                                <th className="p-3 border">Email</th>
+                                <th className="p-3 border">Phone</th>
                             </tr>
                         </thead>
 
-                        {/* BODY */}
                         <tbody className="text-sm">
 
                             {paged.map((item) => (
                                 <tr key={item._id} className="hover:bg-gray-50">
 
-                                    {/* NAME */}
                                     <td
-                                        className="p-3 border font-medium cursor-pointer transition"
-                                        style={{ color: "rgba(10, 132, 162, 1)" }}
+                                        className="p-3 border font-medium text-[rgba(10,132,162,1)] cursor-pointer"
                                         onClick={() => navigate(`/profile/${item._id}`)}
                                     >
-                                        {item.name || "-"}
+                                        {item.first_name} {item.last_name || ""}
                                     </td>
 
-                                    {/* DESIGNATION */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.designation || "-"}
+                                    <td className="p-3 border">{item.designation || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_name || "-"}</td>
+
+                                    <td className="p-3 border">{item.city || "-"}</td>
+
+                                    <td className="p-3 border">{item.state || "-"}</td>
+
+                                    <td className="p-3 border">{item.country || "-"}</td>
+
+                                    <td className="p-3 border">
+                                        {item.personal_email || item.business_email || "-"}
                                     </td>
 
-                                    {/* COMPANY */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.company || item.name || "-"}
-                                    </td>
-
-                                    {/* INDUSTRY */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.industry || "-"}
-                                    </td>
-
-                                    {/* CITY */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.city || "-"}
-                                    </td>
-
-                                    {/* STATE */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.state || "-"}
-                                    </td>
-
-                                    {/* COUNTRY */}
-                                    <td className="px-4 py-3 text-gray-700">
-                                        {item.country || "-"}
-                                    </td>
-
+                                    <td className="p-3 border">{item.phone || "-"}</td>
 
                                 </tr>
                             ))}
 
                         </tbody>
                     </table>
+
+                ) : (
+
+                    /* ================= COMPANY TABLE ================= */
+                    <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+
+                        <thead className="bg-gray-100 text-gray-600 text-xs uppercase">
+                            <tr>
+                                <th className="p-3 border">Company Name</th>
+                                <th className="p-3 border">Type</th>
+                                <th className="p-3 border">Industry</th>
+                                <th className="p-3 border">City</th>
+                                <th className="p-3 border">State</th>
+                                <th className="p-3 border">Country</th>
+                                <th className="p-3 border">Website</th>
+                            </tr>
+                        </thead>
+
+                        <tbody className="text-sm">
+
+                            {paged.map((item) => (
+                                <tr key={item._id} className="hover:bg-gray-50">
+
+                                    <td className="p-3 border font-medium text-[rgba(10,132,162,1)]">
+                                        {item.company_name || "-"}
+                                    </td>
+
+                                    <td className="p-3 border">{item.company_type || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_industry || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_city || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_state || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_country || "-"}</td>
+
+                                    <td className="p-3 border">{item.company_website || "-"}</td>
+
+                                </tr>
+                            ))}
+
+                        </tbody>
+                    </table>
+
                 )}
+
             </div>
 
             {/* PAGINATION */}
