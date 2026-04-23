@@ -13,15 +13,21 @@ const SearchPage = () => {
     const [query, setQuery] = useState("");
     const [tab, setTab] = useState("people");
     const navigate = useNavigate();
+
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const q = params.get("query");
 
         if (q) {
             setQuery(q);
-            handleSearchFromHistory(q);
         }
     }, [location.search]);
+
+    useEffect(() => {
+        if (!query || query.trim() === "") return;
+
+        runSearch(query);
+    }, [query, tab]);
 
     const handleSearchFromHistory = async (q) => {
         setLoading(true);
@@ -97,16 +103,15 @@ const SearchPage = () => {
     // -----------------------------
     const lastQueryRef = useRef("");
 
-    const handleSearch = useCallback(async () => {
+    const runSearch = useCallback(async () => {
         const cleanQuery = query.trim().toLowerCase();
 
-        // ❌ empty or space only
+        console.log("🔵 FRONTEND SEARCH START");
+        console.log("📝 Query:", cleanQuery);
+        console.log("🏷️ Tab:", tab);
+        console.log("🎛️ Filters:", filters);
+
         if (!cleanQuery) return;
-
-        // ❌ prevent duplicate API calls
-        if (lastQueryRef.current === cleanQuery) return;
-
-        lastQueryRef.current = cleanQuery;
 
         setLoading(true);
         setSearched(true);
@@ -116,8 +121,9 @@ const SearchPage = () => {
                 Object.entries(filters).filter(([_, v]) => v && v.trim() !== "")
             );
 
-            const params = new URLSearchParams();
+            console.log("🧹 Clean Filters:", cleanFilters);
 
+            const params = new URLSearchParams();
             params.append("query", cleanQuery);
             params.append("type", tab);
 
@@ -125,24 +131,26 @@ const SearchPage = () => {
                 params.append(k, v);
             });
 
+            console.log("📡 API PARAMS:", params.toString());
+
             const token = localStorage.getItem("token");
 
             const res = await fetch(
                 `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` }
                 }
             );
 
             const data = await res.json();
 
-            setResults(data);
+            console.log("📥 RESPONSE:", data);
+
+            setResults(data.data || []);
             setPage(1);
 
         } catch (err) {
-            console.log(err);
+            console.log("❌ FRONTEND ERROR:", err);
         }
 
         setLoading(false);
@@ -161,6 +169,7 @@ const SearchPage = () => {
                 updated.state = "";
                 updated.city = "";
             }
+
             if (key === "state") {
                 updated.city = "";
             }
@@ -168,6 +177,11 @@ const SearchPage = () => {
             return updated;
         });
     };
+
+    useEffect(() => {
+        if (!query) return;
+        runSearch();
+    }, [filters, tab]);
 
     // -----------------------------
     // LOAD FILTER OPTIONS
@@ -188,6 +202,7 @@ const SearchPage = () => {
 
         fetchFilters();
     }, []);
+
 
     const downloadExcel = async () => {
         if (!results || results.length === 0) {
@@ -244,6 +259,12 @@ const SearchPage = () => {
         saveAs(file, fileName);
     };
 
+    useEffect(() => {
+        if (!query) return;
+        runSearch();
+    }, [filters, tab]);
+
+
     return (
         <div className="p-6">
 
@@ -255,14 +276,14 @@ const SearchPage = () => {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                            handleSearch();
+                            runSearch();
                         }
                     }} placeholder={`Search ${tab === "people" ? "people, roles, companies..." : "companies, industries..."}`}
                     className="flex-1 bg-transparent outline-none text-gray-700 placeholder-gray-400"
                 />
 
                 <button
-                    onClick={handleSearch}
+                    onClick={runSearch}
                     className="btn-primary1"
                 >
                     Search
@@ -456,7 +477,6 @@ const SearchPage = () => {
 
                         </tbody>
                     </table>
-
                 )}
 
             </div>
