@@ -15,6 +15,7 @@ import SubAdmins from "./pages/SubAdmins";
 import AdminAddEmployee from "./pages/AdminAddEmployee";
 import AddCompany from "./pages/AdminAddCompany";
 import AdminViewData from "./pages/AdminViewData";
+import AdminAddingFullEmployees from "./pages/AdminEmployeesCompany";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -43,13 +44,15 @@ const App = () => {
           <Route path="/admin/add-company" element={<AddCompany />} />
           <Route path="/admin/view-data" element={<AdminViewData />} />
 
+          <Route path="/admin/add-employees" element={<AdminAddingFullEmployees />} />
+
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="search" element={<SearchPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="downloads" element={<DownloadsPage />} />
             <Route path="subscription" element={<SubscriptionPage />} />
-          <Route path="profile/:id" element={<ProfilePage />} />
+            <Route path="profile/:id" element={<ProfilePage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

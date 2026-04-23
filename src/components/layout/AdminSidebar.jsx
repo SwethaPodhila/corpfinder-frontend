@@ -100,6 +100,15 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                         Add Company
                     </Link>
 
+                    <Link
+                        to="/admin/add-employees"
+                        className={getLinkClass("/admin/add-employee")}
+                        style={location.pathname === "/admin/add-employee" ? activeStyle : {}}
+                    >
+                        <Users className="h-4 w-4" />
+                        Add Employee
+                    </Link>
+
                 </nav>
 
                 {/* LOGOUT */}
