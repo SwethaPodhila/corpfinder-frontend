@@ -20,14 +20,15 @@ const SearchPage = () => {
 
         if (q) {
             setQuery(q);
+            runSearch(q);
         }
     }, [location.search]);
 
-    useEffect(() => {
-        if (!query || query.trim() === "") return;
-
-        runSearch(query);
-    }, [query, tab]);
+    /* useEffect(() => {
+         if (!query || query.trim() === "") return;
+ 
+         runSearch(query);
+     }, [query, tab]);*/
 
     const handleSearchFromHistory = async (q) => {
         setLoading(true);
@@ -103,8 +104,9 @@ const SearchPage = () => {
     // -----------------------------
     const lastQueryRef = useRef("");
 
-    const runSearch = useCallback(async () => {
-        const cleanQuery = query.trim().toLowerCase();
+    const runSearch = useCallback(async (searchText) => {
+        // const cleanQuery = query.trim().toLowerCase();
+        const cleanQuery = (searchText || query).trim().toLowerCase();
 
         console.log("🔵 FRONTEND SEARCH START");
         console.log("📝 Query:", cleanQuery);
@@ -259,10 +261,10 @@ const SearchPage = () => {
         saveAs(file, fileName);
     };
 
-    useEffect(() => {
-        if (!query) return;
-        runSearch();
-    }, [filters, tab]);
+    /* useEffect(() => {
+         if (!query) return;
+         runSearch();
+     }, [filters, tab]); */
 
 
     return (
