@@ -66,7 +66,7 @@ const SearchPage = () => {
 
             console.log("🔑 Token exists:", !!token);
 
-            const url = `http://localhost:5000/filters/search?query=${cleanQuery}`;
+            const url = `https://corpfinder-backend.onrender.com/filters/search?query=${cleanQuery}`;
 
             console.log("🌐 API URL:", url);
 
