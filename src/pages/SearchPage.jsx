@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Search as SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -45,10 +45,18 @@ const SearchPage = () => {
     });
 
     // ---------------- SEARCH ----------------
-    const runSearch = useCallback(async (searchText = query) => {
+    const runSearch = useCallback(async (searchText) => {
 
-        const cleanQuery = (searchText || "").trim().toLowerCase();
-        if (!cleanQuery) return;
+        console.log("🚀 runSearch triggered with:", searchText);
+
+        const cleanQuery = String(searchText || "").trim().toLowerCase();
+
+        console.log("🧹 Clean query:", cleanQuery);
+
+        if (!cleanQuery) {
+            console.log("⛔ Empty query blocked");
+            return;
+        }
 
         setLoading(true);
         setSearched(true);
@@ -56,26 +64,36 @@ const SearchPage = () => {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(
-                `https://corpfinder-backend.onrender.com/filters/search?query=${cleanQuery}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+            console.log("🔑 Token exists:", !!token);
+
+            const url = `http://localhost:5000/filters/search?query=${cleanQuery}`;
+
+            console.log("🌐 API URL:", url);
+
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`
                 }
-            );
+            });
+
+            console.log("📡 Response status:", res.status);
 
             const data = await res.json();
+
+            console.log("📦 Full API response:", data);
+            console.log("📊 Data array length:", data?.data?.length);
+
             setResults(data.data || []);
             setPage(1);
 
         } catch (err) {
-            console.log(err);
+            console.log("❌ Search error:", err);
+        } finally {
+            setLoading(false);
+            console.log("🏁 Loading finished");
         }
 
-        setLoading(false);
-
-    }, [query]);
+    }, []);
 
     /* useEffect(() => {
          const params = new URLSearchParams(location.search);
@@ -88,24 +106,34 @@ const SearchPage = () => {
      }, [location.search, runSearch]);*/
 
 
+    const hasRestored = useRef(false);
+
     useEffect(() => {
-        if (location.state?.results) {
+
+        // 1️⃣ BACK NAVIGATION (ONLY ONCE)
+        if (location.state?.results && !hasRestored.current) {
+
+            hasRestored.current = true;
+
             setResults(location.state.results);
-            setFilters(location.state.filters);
-            setPage(location.state.page);
-            setQuery(location.state.query);
+            setFilters(location.state.filters || {});
+            setPage(location.state.page || 1);
+            setQuery(location.state.query || "");
             setSearched(true);
+
             return;
         }
 
+        // 2️⃣ URL SEARCH (ONLY IF NO DATA RESTORED)
         const params = new URLSearchParams(location.search);
         const q = params.get("query");
 
-        if (q) {
+        if (q && !hasRestored.current) {
             setQuery(q);
             runSearch(q);
         }
-    }, []);
+
+    }, [location.search]);
 
     const normalize = (val) =>
         (val || "")
