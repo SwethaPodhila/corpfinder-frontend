@@ -23,7 +23,7 @@ import SearchPage from "./pages/SearchPage";
 import HistoryPage from "./pages/HistoryPage";
 import DownloadsPage from "./pages/DownloadsPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
-import ProfilePage from "./pages/ProfilePage";
+import ProfilePage from "./pages/FullProfile";
 
 import NotFound from "./pages/NotFound";
 
@@ -52,6 +52,7 @@ const App = () => {
             <Route path="history" element={<HistoryPage />} />
             <Route path="downloads" element={<DownloadsPage />} />
             <Route path="subscription" element={<SubscriptionPage />} />
+
             <Route path="profile/:id" element={<ProfilePage />} />
           </Route>
 

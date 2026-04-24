@@ -83,6 +83,15 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     </Link>
 
                     <Link
+                        to="/admin/add-employees"
+                        className={getLinkClass("/admin/add-employees")}
+                        style={location.pathname === "/admin/add-employees" ? activeStyle : {}}
+                    >
+                        <Users className="h-4 w-4" />
+                        Add Employee
+                    </Link>
+
+                    {/*<Link
                         to="/admin/add-employee"
                         className={getLinkClass("/admin/add-employee")}
                         style={location.pathname === "/admin/add-employee" ? activeStyle : {}}
@@ -98,16 +107,7 @@ const AdminSidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     >
                         <Building2 className="h-4 w-4" />
                         Add Company
-                    </Link>
-
-                    <Link
-                        to="/admin/add-employees"
-                        className={getLinkClass("/admin/add-employee")}
-                        style={location.pathname === "/admin/add-employee" ? activeStyle : {}}
-                    >
-                        <Users className="h-4 w-4" />
-                        Add Employee
-                    </Link>
+                    </Link>*/}
 
                 </nav>
 

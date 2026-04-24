@@ -31,7 +31,7 @@ const ViewData = () => {
     // 🔥 Fetch Employees
     const fetchEmployees = async () => {
         try {
-            const res = await fetch("http://localhost:5000/employees/allEmployees", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employees/allEmployees", {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("adminToken")}`
                 }
@@ -61,7 +61,7 @@ const ViewData = () => {
         if (!window.confirm("Delete this record?")) return;
 
         const res = await fetch(
-            `http://localhost:5000/employee/delete/${id}`,
+            `https://corpfinder-backend.onrender.com/employee/delete/${id}`,
             {
                 method: "DELETE",
                 headers: {
@@ -147,7 +147,7 @@ const ViewData = () => {
         };
 
         const res = await fetch(
-            `http://localhost:5000/employees/update/${editingId}`,
+            `https://corpfinder-backend.onrender.com/employees/update/${editingId}`,
             {
                 method: "PUT",
                 headers: {

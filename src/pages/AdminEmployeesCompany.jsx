@@ -24,7 +24,7 @@ const AddEmployee = () => {
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:5000/employees/add", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employees/add", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +68,7 @@ const AddEmployee = () => {
         fd.append("file", file);
 
         try {
-            const res = await fetch("http://localhost:5000/employees/upload", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employees/upload", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
