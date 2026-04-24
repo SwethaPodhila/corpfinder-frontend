@@ -45,18 +45,9 @@ const SearchPage = () => {
     });
 
     // ---------------- SEARCH ----------------
-    const runSearch = useCallback(async (searchText) => {
-
-        console.log("🚀 runSearch triggered with:", searchText);
+    const runSearch = useCallback(async (searchText = query) => {
 
         const cleanQuery = String(searchText || "").trim().toLowerCase();
-
-        console.log("🧹 Clean query:", cleanQuery);
-
-        if (!cleanQuery) {
-            console.log("⛔ Empty query blocked");
-            return;
-        }
 
         setLoading(true);
         setSearched(true);
@@ -64,11 +55,18 @@ const SearchPage = () => {
         try {
             const token = localStorage.getItem("token");
 
-            console.log("🔑 Token exists:", !!token);
+            const params = new URLSearchParams({
+                query: cleanQuery,
+                country: filters.country || "",
+                state: filters.state || "",
+                city: filters.city || "",
+                designation: filters.designation || "",
+                industry: filters.industry || ""
+            });
 
-            const url = `https://corpfinder-backend.onrender.com/filters/search?query=${cleanQuery}`;
+            const url = `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
 
-            console.log("🌐 API URL:", url);
+            console.log("🌐 Search URL:", url);
 
             const res = await fetch(url, {
                 headers: {
@@ -76,35 +74,18 @@ const SearchPage = () => {
                 }
             });
 
-            console.log("📡 Response status:", res.status);
-
             const data = await res.json();
-
-            console.log("📦 Full API response:", data);
-            console.log("📊 Data array length:", data?.data?.length);
 
             setResults(data.data || []);
             setPage(1);
 
         } catch (err) {
-            console.log("❌ Search error:", err);
+            console.log(err);
         } finally {
             setLoading(false);
-            console.log("🏁 Loading finished");
         }
 
-    }, []);
-
-    /* useEffect(() => {
-         const params = new URLSearchParams(location.search);
-         const q = params.get("query");
- 
-         if (q) {
-             setQuery(q);
-             runSearch(q); // auto search trigger
-         }
-     }, [location.search, runSearch]);*/
-
+    }, [query, filters]);
 
     const hasRestored = useRef(false);
 
@@ -228,6 +209,13 @@ const SearchPage = () => {
             console.log("Upload failed:", err);
         }
     };
+
+    useEffect(() => {
+        // avoid running on first render
+        if (!searched) return;
+
+        runSearch(query);
+    }, [filters]);
 
     return (
         <div className="p-6">

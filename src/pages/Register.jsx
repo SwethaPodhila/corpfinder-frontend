@@ -102,7 +102,7 @@ const Register = () => {
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
-            alert("Account verified 🎉");
+           // alert("Account verified 🎉");
 
             navigate("/dashboard"); // direct dashboard ki vellachu
 
