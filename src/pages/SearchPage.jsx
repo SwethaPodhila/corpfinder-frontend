@@ -193,7 +193,7 @@ const SearchPage = () => {
             filters.designation ||
             filters.industry
         ) {
-            runSearch("");
+            runSearch(query);   // 🔥 KEEP QUERY ALWAYS
         }
     }, [filters]);
 
