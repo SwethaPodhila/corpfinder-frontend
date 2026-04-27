@@ -3,7 +3,7 @@ import { Search as SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Download } from "lucide-react";
+import { Search, Loader2, Inbox, Download } from "lucide-react";
 import FILTER_DATA from "../data/filterData";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -45,7 +45,7 @@ const SearchPage = () => {
     });
 
     // ---------------- SEARCH ----------------
-    const runSearch = useCallback(async (searchText = query) => {
+    const runSearch = async (searchText = query) => {
 
         const cleanQuery = String(searchText || "").trim().toLowerCase();
 
@@ -84,8 +84,7 @@ const SearchPage = () => {
         } finally {
             setLoading(false);
         }
-
-    }, [query, filters]);
+    };
 
     const hasRestored = useRef(false);
 
@@ -116,32 +115,8 @@ const SearchPage = () => {
 
     }, [location.search]);
 
-    const normalize = (val) =>
-        (val || "")
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, " ");
-
     // ---------------- FILTER DATA ----------------
-    const filteredResults = results.filter((item) => {
-        return (
-            (!filters.country ||
-                normalize(item.country).includes(normalize(filters.country))) &&
-
-            (!filters.state ||
-                normalize(item.state).includes(normalize(filters.state))) &&
-
-            (!filters.city ||
-                normalize(item.city).includes(normalize(filters.city))) &&
-
-            (!filters.designation ||
-                normalize(item.designation).includes(normalize(filters.designation))) &&
-
-            (!filters.industry ||
-                normalize(item.company_industry).includes(normalize(filters.industry)))
-        );
-    });
+    const filteredResults = results;
 
     const paged = filteredResults.slice(
         (page - 1) * ITEMS_PER_PAGE,
@@ -211,10 +186,15 @@ const SearchPage = () => {
     };
 
     useEffect(() => {
-        // avoid running on first render
-        if (!searched) return;
-
-        runSearch(query);
+        if (
+            filters.country ||
+            filters.state ||
+            filters.city ||
+            filters.designation ||
+            filters.industry
+        ) {
+            runSearch("");
+        }
     }, [filters]);
 
     return (
@@ -328,7 +308,6 @@ const SearchPage = () => {
                         <option key={idx} value={i}>{i}</option>
                     ))}
                 </select>
-
             </div>
 
             {/* ================= EXPORT ================= */}
@@ -346,22 +325,62 @@ const SearchPage = () => {
             <div className="mt-6 bg-white rounded-2xl shadow-md border overflow-hidden">
 
                 {!searched ? (
-                    <div className="text-center py-20 text-gray-500">
-                        Start searching...
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-600">
+
+                        <div
+                            className="p-5 rounded-full mb-4"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(10,132,162,0.15), rgba(13,165,199,0.15))"
+                            }}
+                        >
+                            <Search size={30} className="text-cyan-600" />
+                        </div>
+
+                        <p className="text-lg font-semibold text-gray-700">Start Searching</p>
+
+                        <p className="text-sm text-gray-400 mt-1">
+                            Use filters or keywords to find employees
+                        </p>
                     </div>
 
                 ) : loading ? (
-                    <div className="text-center py-20">
-                        Searching...
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-600">
+
+                        <div
+                            className="p-5 rounded-full mb-4"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(10,132,162,0.15), rgba(13,165,199,0.15))"
+                            }}
+                        >
+                            <Loader2 size={30} className="animate-spin text-cyan-600" />
+                        </div>
+
+                        <p className="text-lg font-semibold text-gray-700">Searching...</p>
+
+                        <p className="text-sm text-gray-400 mt-1">
+                            Fetching results, please wait
+                        </p>
                     </div>
 
                 ) : paged.length === 0 ? (
-                    <div className="text-center py-20">
-                        No results found
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-600">
+
+                        <div
+                            className="p-5 rounded-full mb-4"
+                            style={{
+                                background: "linear-gradient(135deg, rgba(10,132,162,0.15), rgba(13,165,199,0.15))"
+                            }}
+                        >
+                            <Inbox size={30} className="text-cyan-600" />
+                        </div>
+
+                        <p className="text-lg font-semibold text-gray-700">No Results Found</p>
+
+                        <p className="text-sm text-gray-400 mt-1">
+                            Try changing filters or search query
+                        </p>
                     </div>
-
                 ) : (
-
                     <table className="min-w-full border">
 
                         <thead className="bg-gray-100 text-xs uppercase">
