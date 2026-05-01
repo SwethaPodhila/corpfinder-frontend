@@ -381,124 +381,128 @@ const SearchPage = () => {
                         </p>
                     </div>
                 ) : (
-                    <table className="min-w-full border">
+                    <div className="mt-6 bg-white rounded-2xl shadow-lg border overflow-hidden">
 
-                        <thead className="bg-gray-100 text-xs uppercase">
-                            <tr>
-                                <th className="p-3 border">Full Name</th>
-                                <th className="p-3 border">Designation</th>
-                                <th className="p-3 border">Company Name</th>
-                                <th className="p-3 border">City</th>
-                                <th className="p-3 border">State</th>
-                                <th className="p-3 border">Country</th>
-                                <th className="p-3 border">Company Type</th>
-                                <th className="p-3 border">Company Industry</th>
-                                <th className="p-3 border">Personal Email</th>
-                                <th className="p-3 border">Phone</th>
-                                <th className="p-3 border">Actions</th>
-                            </tr>
-                        </thead>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full text-sm text-left">
 
-                        <tbody className="text-sm">
+                                {/* HEADER */}
+                                <thead className="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+                                    <tr>
+                                        <th className="px-6 py-4">Full Name</th>
+                                        <th className="px-6 py-4">Designation</th>
+                                        <th className="px-6 py-4">Company</th>
+                                        <th className="px-6 py-4">Location</th>
+                                        <th className="px-6 py-4">Industry</th>
+                                        <th className="px-6 py-4">Email</th>
+                                        <th className="px-6 py-4">Phone</th>
+                                        <th className="px-6 py-4 text-center">Action</th>
+                                    </tr>
+                                </thead>
 
-                            {paged.map((item) => (
-                                <tr key={item._id} className="hover:bg-gray-50">
+                                {/* BODY */}
+                                <tbody className="divide-y">
 
-                                    <td
-                                        className="p-3 border font-medium text-[rgba(10,132,162,1)] cursor-pointer"
-                                        onClick={() =>
-                                            navigate(`/dashboard/profile/${item._id}`, {
-                                                state: {
-                                                    results,
-                                                    filters,
-                                                    page,
-                                                    query,
-                                                },
-                                            })
-                                        }
-                                    >
-                                        {item.first_name + " " + item.last_name || "-"}
-                                    </td>
-
-                                    <td className="p-3 border">{item.designation || "-"}</td>
-                                    <td className="p-3 border">{item.company_name || "-"}</td>
-                                    <td className="p-3 border">{item.city || "-"}</td>
-                                    <td className="p-3 border">{item.state || "-"}</td>
-                                    <td className="p-3 border">{item.country || "-"}</td>
-                                    <td className="p-3 border">{item.company_type || "-"}</td>
-                                    <td className="p-3 border">{item.company_industry || "-"}</td>
-
-                                    <td className="p-3 border">
-                                        <div className="flex items-center justify-between gap-2">
-
-                                            <span className="truncate">
-                                                {visibleFields[item._id]?.email
-                                                    ? item.personal_email || "-"
-                                                    : "•••••••"}
-                                            </span>
-
-                                            <button
-                                                onClick={() => toggleField(item._id, "email")}
-                                                className="p-1.5 rounded-md hover:bg-gray-100 transition"
-                                                title={visibleFields[item._id]?.email ? "Hide email" : "Show email"}
-                                            >
-                                                {visibleFields[item._id]?.email ? (
-                                                    <EyeOff size={18} className="text-gray-700" />
-                                                ) : (
-                                                    <Eye size={18} className="text-gray-700" />
-                                                )}
-                                            </button>
-
-                                        </div>
-                                    </td>
-
-                                    <td className="p-3 border">
-                                        <div className="flex items-center justify-between gap-2">
-
-                                            <span className="tracking-wider">
-                                                {visibleFields[item._id]?.phone
-                                                    ? item.phone || "-"
-                                                    : "•••••••"}
-                                            </span>
-
-                                            <button
-                                                onClick={() => toggleField(item._id, "phone")}
-                                                className="p-1.5 rounded-md hover:bg-gray-100 transition"
-                                                title={visibleFields[item._id]?.phone ? "Hide phone" : "Show phone"}
-                                            >
-                                                {visibleFields[item._id]?.phone ? (
-                                                    <EyeOff size={18} className="text-gray-700" />
-                                                ) : (
-                                                    <Eye size={18} className="text-gray-700" />
-                                                )}
-                                            </button>
-
-                                        </div>
-                                    </td>
-
-                                    <td className="p-3 border">
-                                        <button
-                                            onClick={() =>
-                                                navigate(`/dashboard/profile/${item._id}`, {
-                                                    state: {
-                                                        results,
-                                                        filters,
-                                                        page,
-                                                        query,
-                                                    },
-                                                })
-                                            }
-                                            className="px-3 py-1 bg-blue-600 text-white rounded"
+                                    {paged.map((item) => (
+                                        <tr
+                                            key={item._id}
+                                            className="hover:bg-gray-50 transition duration-200"
                                         >
-                                            View Full Details
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
 
-                        </tbody>
+                                            {/* NAME */}
+                                            <td
+                                                className="px-6 py-4 font-semibold text-cyan-700 cursor-pointer hover:underline"
+                                                onClick={() =>
+                                                    navigate(`/dashboard/profile/${item._id}`, {
+                                                        state: { results, filters, page, query },
+                                                    })
+                                                }
+                                            >
+                                                {item.first_name + " " + item.last_name || "-"}
+                                            </td>
 
-                    </table>
+                                            <td className="px-6 py-4">{item.designation || "-"}</td>
+
+                                            <td className="px-6 py-4">{item.company_name || "-"}</td>
+
+                                            {/* LOCATION MERGED */}
+                                            <td className="px-6 py-4 text-gray-500">
+                                                {item.city}, {item.state}
+                                            </td>
+
+                                            <td className="px-6 py-4">{item.company_industry || "-"}</td>
+
+                                            {/* EMAIL */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+
+                                                    <span className="truncate max-w-[140px]">
+                                                        {visibleFields[item._id]?.email
+                                                            ? item.personal_email || "-"
+                                                            : "••••••••"}
+                                                    </span>
+
+                                                    <button
+                                                        onClick={() => toggleField(item._id, "email")}
+                                                        className="p-1 rounded hover:bg-gray-200"
+                                                    >
+                                                        {visibleFields[item._id]?.email ? (
+                                                            <EyeOff size={16} />
+                                                        ) : (
+                                                            <Eye size={16} />
+                                                        )}
+                                                    </button>
+
+                                                </div>
+                                            </td>
+
+                                            {/* PHONE */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+
+                                                    <span>
+                                                        {visibleFields[item._id]?.phone
+                                                            ? item.phone || "-"
+                                                            : "••••••••"}
+                                                    </span>
+
+                                                    <button
+                                                        onClick={() => toggleField(item._id, "phone")}
+                                                        className="p-1 rounded hover:bg-gray-200"
+                                                    >
+                                                        {visibleFields[item._id]?.phone ? (
+                                                            <EyeOff size={16} />
+                                                        ) : (
+                                                            <Eye size={16} />
+                                                        )}
+                                                    </button>
+
+                                                </div>
+                                            </td>
+
+                                            {/* ACTION */}
+                                            <td className="px-6 py-4 text-center">
+                                                <button
+                                                    onClick={() =>
+                                                        navigate(`/dashboard/profile/${item._id}`, {
+                                                            state: { results, filters, page, query },
+                                                        })
+                                                    }
+                                                    className="px-4 py-1.5 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
+                                                >
+                                                    View
+                                                </button>
+                                            </td>
+
+                                        </tr>
+                                    ))}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+
                 )}
             </div>
 
