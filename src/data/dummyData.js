@@ -64,9 +64,51 @@ export const cities = {
 };
 
 export const pricingPlans = [
-    { name: "Free", price: "$0", period: "/month", records: 100, features: ["100 search results", "Basic filters", "Company profiles", "Email support"], highlighted: false },
-    { name: "Pro", price: "$29", period: "/month", records: 500, features: ["500 search results", "Advanced filters", "Employee discovery", "Export to Excel", "Priority support"], highlighted: true },
-    { name: "Premium", price: "$79", period: "/month", records: 1000, features: ["1000 search results", "All filters", "Full employee data", "Unlimited exports", "API access", "Dedicated support"], highlighted: false },
+    {
+        name: "Free",
+        price: "$0",
+        credits: 50,
+        tagline: "Get started",
+        features: [
+            "Unlimited search",
+            "Basic filters",
+            "50 contact unlocks",
+            "Download up to 50 contacts",
+            "Blurred contact details"
+        ],
+        cta: "Start Free"
+    },
+    {
+        name: "Pro",
+        price: "$39",
+        credits: 2500,
+        tagline: "Most Popular",
+        features: [
+            "Unlimited search",
+            "Advanced filters",
+            "2500 contact unlocks",
+            "Download up to 2500 contacts",
+            "Email, Phone, LinkedIn access",
+            "Export to Excel"
+        ],
+        cta: "Upgrade to Pro",
+        highlight: true
+    },
+    {
+        name: "Premium",
+        price: "$79",
+        credits: 5000,
+        tagline: "For power users",
+        features: [
+            "Everything in Pro",
+            "5000 contact unlocks",
+            "Download up to 5000 contacts",
+            "Full profile insights",
+            "Bulk export (Excel + CSV)",
+            "API access"
+        ],
+        cta: "Go Premium"
+    }
 ];
 
 export const searchHistory = [

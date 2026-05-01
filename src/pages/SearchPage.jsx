@@ -501,8 +501,6 @@ const SearchPage = () => {
                             </table>
                         </div>
                     </div>
-
-
                 )}
             </div>
 
