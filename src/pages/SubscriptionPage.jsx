@@ -1,10 +1,95 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, Zap } from "lucide-react";
 import { pricingPlans } from "../data/dummyData";
+import { load } from "@cashfreepayments/cashfree-js";
 
 const SubscriptionPage = () => {
-    const currentPlan = "Free";
+
+    const [currentPlan, setCurrentPlan] = useState("free");
+    const [credits, setCredits] = useState(0);
+    const [totalCredits, setTotalCredits] = useState(50);
+    const [message, setMessage] = useState("");
+
+    // 🔥 FETCH USER STATUS
+    useEffect(() => {
+        const fetchStatus = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                const res = await fetch("http://localhost:5000/user/status", {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                const data = await res.json();
+
+                console.log("USER STATUS API:", data);
+
+                const plan = data.plan || "free";
+                const credits = data.credits ?? 0;
+
+                setCurrentPlan(plan);
+                setCredits(credits);
+
+                if (plan === "free") setTotalCredits(50);
+                else if (plan === "pro") setTotalCredits(2500);
+                else if (plan === "premium") setTotalCredits(5000);
+
+                setMessage(data.message || "");
+
+            } catch (err) {
+                console.log(err);
+            }
+        };
+
+        fetchStatus();
+    }, []);
+
+    // 🔥 PAYMENT HANDLER
+    const handleUpgrade = async (plan) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            // 1️⃣ Create order
+            const res = await fetch("https://corpfinder-backend.onrender.com/payment/create-order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    planName: plan.name.toLowerCase()
+                })
+            });
+
+            const data = await res.json();
+
+            // 2️⃣ Load Cashfree
+            const cashfree = await load({
+                mode: "production"
+            });
+
+            // 3️⃣ Open checkout
+            cashfree.checkout({
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: "_modal"
+            });
+
+            // 4️⃣ Poll for update (simple way)
+            /* setTimeout(() => {
+                 window.location.reload();
+             }, 5000); */
+
+        } catch (err) {
+            console.log("Payment error:", err);
+        }
+    };
+
+    // 🔥 CALCULATE PROGRESS
+    const used = totalCredits - credits;
+    const percent = (used / totalCredits) * 100;
 
     return (
         <div>
@@ -17,6 +102,13 @@ const SubscriptionPage = () => {
                 </p>
             </motion.div>
 
+            {/* 🔥 WARNING MESSAGE */}
+            {message && (
+                <div className="mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-lg">
+                    {message}
+                </div>
+            )}
+
             {/* Current Plan */}
             <div className="mt-6 card-elevated">
                 <div className="flex items-center gap-3">
@@ -26,18 +118,19 @@ const SubscriptionPage = () => {
 
                     <div>
                         <p className="font-heading font-semibold text-foreground">
-                            Current Plan: {currentPlan}
+                            Current Plan: {currentPlan.toUpperCase()}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            42 / 100 results used this month
+                            {used} / {totalCredits} credits used
                         </p>
                     </div>
                 </div>
 
+                {/* 🔥 PROGRESS BAR */}
                 <div className="mt-4 h-3 rounded-full bg-muted overflow-hidden">
                     <div
                         className="h-full rounded-full bg-primary"
-                        style={{ width: "42%" }}
+                        style={{ width: `${percent}%` }}
                     />
                 </div>
             </div>
@@ -51,7 +144,7 @@ const SubscriptionPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
                         className={`rounded-2xl border p-6 ${plan.highlighted ? "border-primary" : "border-border"
-                            } ${currentPlan === plan.name ? "ring-2 ring-primary" : ""}`}
+                            } ${currentPlan === plan.name.toLowerCase() ? "ring-2 ring-primary" : ""}`}
                     >
                         {plan.highlighted && (
                             <div className="mb-3 inline-block rounded-full bg-primary px-3 py-1 text-xs text-white">
@@ -80,14 +173,18 @@ const SubscriptionPage = () => {
                         </ul>
 
                         <button
-                            className={`mt-6 w-full py-2 ${currentPlan === plan.name
-                                    ? "bg-muted cursor-default"
-                                    : plan.highlighted
-                                        ? "btn-primary1"
-                                        : "btn-outline-primary"
+                            onClick={() => handleUpgrade(plan)}
+                            disabled={currentPlan === plan.name.toLowerCase()}
+                            className={`mt-6 w-full py-2 ${currentPlan === plan.name.toLowerCase()
+                                ? "bg-muted cursor-not-allowed"
+                                : plan.highlighted
+                                    ? "btn-primary1"
+                                    : "btn-outline-primary"
                                 }`}
                         >
-                            {currentPlan === plan.name ? "Current Plan" : "Upgrade"}
+                            {currentPlan === plan.name.toLowerCase()
+                                ? "Current Plan"
+                                : "Upgrade"}
                         </button>
                     </motion.div>
                 ))}
