@@ -17,7 +17,7 @@ const SubscriptionPage = () => {
             try {
                 const token = localStorage.getItem("token");
 
-                const res = await fetch("http://localhost:5000/user/status", {
+                const res = await fetch("https://corpfinder-backend.onrender.com/user/status", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
