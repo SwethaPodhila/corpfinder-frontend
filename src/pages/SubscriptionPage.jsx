@@ -50,9 +50,15 @@ const SubscriptionPage = () => {
     // 🔥 PAYMENT HANDLER
     const handleUpgrade = async (plan) => {
         try {
+            console.log("PLAN CLICKED:", plan);
+
+            if (!plan?.name) {
+                console.log("❌ plan name missing");
+                return;
+            }
+
             const token = localStorage.getItem("token");
 
-            // 1️⃣ Create order
             const res = await fetch("https://corpfinder-backend.onrender.com/payment/create-order", {
                 method: "POST",
                 headers: {
@@ -65,22 +71,19 @@ const SubscriptionPage = () => {
             });
 
             const data = await res.json();
+            console.log("ORDER RESPONSE:", data);
 
-            // 2️⃣ Load Cashfree
-            const cashfree = await load({
-                mode: "production"
-            });
+            if (!data.paymentSessionId) {
+                console.log("❌ paymentSessionId missing");
+                return;
+            }
 
-            // 3️⃣ Open checkout
+            const cashfree = await load({ mode: "production" });
+
             cashfree.checkout({
                 paymentSessionId: data.paymentSessionId,
                 redirectTarget: "_modal"
             });
-
-            // 4️⃣ Poll for update (simple way)
-            /* setTimeout(() => {
-                 window.location.reload();
-             }, 5000); */
 
         } catch (err) {
             console.log("Payment error:", err);
