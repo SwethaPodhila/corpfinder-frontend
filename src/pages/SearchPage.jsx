@@ -19,15 +19,59 @@ const SearchPage = () => {
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
     const [visibleFields, setVisibleFields] = useState({});
+    const [chargedEmployees, setChargedEmployees] = useState(new Set());
+
+    const handleEmployeeAccess = async (employeeId) => {
+        if (chargedEmployees.has(employeeId)) return;
+
+        try {
+            let token = localStorage.getItem("token");
+
+            if (!token) {
+                console.log("No token found");
+                return;
+            }
+
+            // remove quotes if accidentally stored
+            token = token.replace(/"/g, "");
+
+            const res = await fetch("http://localhost:5000/user/deduct-credits", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ employeeId })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setChargedEmployees(prev => new Set(prev).add(employeeId));
+            } else {
+                console.log("Backend rejected:", data);
+            }
+
+        } catch (err) {
+            console.log("Request error:", err);
+        }
+    };
 
     const toggleField = (id, field) => {
-        setVisibleFields((prev) => ({
-            ...prev,
-            [id]: {
-                ...prev[id],
-                [field]: !prev[id]?.[field]
-            }
-        }));
+        setVisibleFields((prev) => {
+            const updated = {
+                ...prev,
+                [id]: {
+                    ...prev[id],
+                    [field]: !prev[id]?.[field]
+                }
+            };
+
+            // 🔥 SAVE TO LOCALSTORAGE
+            localStorage.setItem("visibleFields", JSON.stringify(updated));
+
+            return updated;
+        });
     };
 
     const maskValue = (value) => {
@@ -64,7 +108,7 @@ const SearchPage = () => {
                 industry: filters.industry || ""
             });
 
-            const url = `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
+            const url = `http://localhost:5000/filters/search?${params.toString()}`;
 
             console.log("🌐 Search URL:", url);
 
@@ -100,6 +144,11 @@ const SearchPage = () => {
             setPage(location.state.page || 1);
             setQuery(location.state.query || "");
             setSearched(true);
+
+            // 🔥 RESTORE UNLOCKED FIELDS
+            if (location.state.visibleFields) {
+                setVisibleFields(location.state.visibleFields);
+            }
 
             return;
         }
@@ -186,15 +235,19 @@ const SearchPage = () => {
     };
 
     useEffect(() => {
-        if (
+        const hasFilters =
             filters.country ||
             filters.state ||
             filters.city ||
             filters.designation ||
-            filters.industry
-        ) {
-            runSearch(query);   // 🔥 KEEP QUERY ALWAYS
-        }
+            filters.industry;
+
+        const hasQuery = query?.trim();
+
+        // ❌ don't call API on first empty load
+        if (!hasQuery && !hasFilters) return;
+
+        runSearch(query);
     }, [filters]);
 
     return (
@@ -412,11 +465,12 @@ const SearchPage = () => {
                                             {/* NAME */}
                                             <td
                                                 className="px-6 py-4 font-semibold text-cyan-700 cursor-pointer hover:underline"
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    handleEmployeeAccess(item._id);
                                                     navigate(`/dashboard/profile/${item._id}`, {
-                                                        state: { results, filters, page, query },
-                                                    })
-                                                }
+                                                        state: { results, filters, page, query, visibleFields },
+                                                    });
+                                                }}
                                             >
                                                 {item.first_name + " " + item.last_name || "-"}
                                             </td>
@@ -443,7 +497,10 @@ const SearchPage = () => {
                                                     </span>
 
                                                     <button
-                                                        onClick={() => toggleField(item._id, "email")}
+                                                        onClick={() => {
+                                                            toggleField(item._id, "email");
+                                                            handleEmployeeAccess(item._id);   // 🔥 credit logic
+                                                        }}
                                                         className="p-1 rounded hover:bg-gray-200"
                                                     >
                                                         {visibleFields[item._id]?.email ? (
@@ -467,7 +524,10 @@ const SearchPage = () => {
                                                     </span>
 
                                                     <button
-                                                        onClick={() => toggleField(item._id, "phone")}
+                                                        onClick={() => {
+                                                            toggleField(item._id, "phone");
+                                                            handleEmployeeAccess(item._id); // 🔥 credit deduction
+                                                        }}
                                                         className="p-1 rounded hover:bg-gray-200"
                                                     >
                                                         {visibleFields[item._id]?.phone ? (
