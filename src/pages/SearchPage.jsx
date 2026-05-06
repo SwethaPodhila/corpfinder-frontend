@@ -103,14 +103,15 @@ const SearchPage = () => {
         try {
             const token = localStorage.getItem("token");
 
-            const params = new URLSearchParams({
-                query: cleanQuery,
-                country: filters.country || "",
-                state: filters.state || "",
-                city: filters.city || "",
-                designation: filters.designation || "",
-                industry: filters.industry || ""
-            });
+            const params = new URLSearchParams();
+
+            if (cleanQuery) params.append("query", cleanQuery);
+            if (filters.country) params.append("country", filters.country);
+            if (filters.state) params.append("state", filters.state);
+            if (filters.city) params.append("city", filters.city);
+            if (filters.designation) params.append("designation", filters.designation);
+            if (filters.industry) params.append("industry", filters.industry);
+
 
             const url = `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
 
