@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
+import { useCredits } from "../../context/CreditsContext";
 import {
     LayoutDashboard,
     Search,
@@ -22,6 +23,7 @@ const sidebarLinks = [
 
 const DashboardLayout = () => {
     const location = useLocation();
+    const { credits } = useCredits();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : { fullName: "user name" };
 
@@ -99,17 +101,22 @@ const DashboardLayout = () => {
 
                     {/* Right Side */}
                     <div className="flex items-center gap-4">
-
+                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-white shadow-sm hover:shadow-md transition">
+                            <CreditCard className="h-5 w-5 text-cyan-600" />
+                            <div className="flex flex-col leading-tight">
+                                <span className="text-sm font-semibold text-gray-800">
+                                    {credits} Credits
+                                </span>
+                            </div>
+                        </div>
                         {/* Notification */}
-                        <button className="relative">
-                            <Bell className="h-5 w-5 text-gray-500" />
-                            <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500" />
-                        </button>
-
+                       
                         {/* User */}
                         <div className="flex items-center gap-3 rounded-xl bg-gray-100 px-3 py-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                                JD
+                                {user.fullName
+                                    .split(" ")
+                                    .map((n) => n[0])}
                             </div>
                             <span className="text-sm font-medium">{user.fullName}</span>
                         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { Search as SearchIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCredits } from "../context/CreditsContext";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,6 +13,8 @@ const ITEMS_PER_PAGE = 10;
 const SearchPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
+    const { fetchCredits } = useCredits();
 
     const [query, setQuery] = useState("");
     const [page, setPage] = useState(1);
@@ -35,7 +38,7 @@ const SearchPage = () => {
             // remove quotes if accidentally stored
             token = token.replace(/"/g, "");
 
-            const res = await fetch("http://localhost:5000/user/deduct-credits", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/user/deduct-credits", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -48,6 +51,7 @@ const SearchPage = () => {
 
             if (data.success) {
                 setChargedEmployees(prev => new Set(prev).add(employeeId));
+                await fetchCredits(); // 🔥 THIS LINE FIXES EVERYTHING
             } else {
                 console.log("Backend rejected:", data);
             }
@@ -108,7 +112,7 @@ const SearchPage = () => {
                 industry: filters.industry || ""
             });
 
-            const url = `http://localhost:5000/filters/search?${params.toString()}`;
+            const url = `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
 
             console.log("🌐 Search URL:", url);
 
