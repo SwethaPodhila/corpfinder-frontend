@@ -8,7 +8,7 @@ import { Search, Loader2, Inbox, Download } from "lucide-react";
 import FILTER_DATA from "../data/filterData";
 import { Eye, EyeOff } from "lucide-react";
 
-const ITEMS_PER_PAGE = 10;
+//const ITEMS_PER_PAGE = 10;
 
 const SearchPage = () => {
     const location = useLocation();
@@ -23,6 +23,9 @@ const SearchPage = () => {
     const [searched, setSearched] = useState(false);
     const [visibleFields, setVisibleFields] = useState({});
     const [chargedEmployees, setChargedEmployees] = useState(new Set());
+
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalResults, setTotalResults] = useState(0);
 
     const handleEmployeeAccess = async (employeeId) => {
         if (chargedEmployees.has(employeeId)) return;
@@ -93,27 +96,60 @@ const SearchPage = () => {
     });
 
     // ---------------- SEARCH ----------------
-    const runSearch = async (searchText = query) => {
+    const runSearch = async (
+        searchText = query,
+        currentPage = 1
+    ) => {
 
-        const cleanQuery = String(searchText || "").trim().toLowerCase();
+        const cleanQuery = String(searchText || "")
+            .trim()
+            .toLowerCase();
 
         setLoading(true);
         setSearched(true);
 
         try {
+
             const token = localStorage.getItem("token");
 
             const params = new URLSearchParams();
 
-            if (cleanQuery) params.append("query", cleanQuery);
-            if (filters.country) params.append("country", filters.country);
-            if (filters.state) params.append("state", filters.state);
-            if (filters.city) params.append("city", filters.city);
-            if (filters.designation) params.append("designation", filters.designation);
-            if (filters.industry) params.append("industry", filters.industry);
+            /* ---------------- SEARCH ---------------- */
 
+            if (cleanQuery) {
+                params.append("query", cleanQuery);
+            }
 
-            const url = `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
+            /* ---------------- FILTERS ---------------- */
+
+            if (filters.country) {
+                params.append("country", filters.country);
+            }
+
+            if (filters.state) {
+                params.append("state", filters.state);
+            }
+
+            if (filters.city) {
+                params.append("city", filters.city);
+            }
+
+            if (filters.designation) {
+                params.append("designation", filters.designation);
+            }
+
+            if (filters.industry) {
+                params.append("industry", filters.industry);
+            }
+
+            /* ---------------- PAGINATION ---------------- */
+
+            params.append("page", currentPage);
+
+            params.append("limit", 50);
+
+            const url =
+                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`;
 
             console.log("🌐 Search URL:", url);
 
@@ -125,13 +161,26 @@ const SearchPage = () => {
 
             const data = await res.json();
 
+            console.log("🔥 RESPONSE:", data);
+
             setResults(data.data || []);
-            setPage(1);
+
+            /* ---------------- PAGINATION STATE ---------------- */
+
+            setPage(data.pagination?.currentPage || 1);
+
+            setTotalPages(data.pagination?.totalPages || 1);
+
+            setTotalResults(data.pagination?.totalResults || 0);
 
         } catch (err) {
+
             console.log(err);
+
         } finally {
+
             setLoading(false);
+
         }
     };
 
@@ -147,6 +196,9 @@ const SearchPage = () => {
             setResults(location.state.results);
             setFilters(location.state.filters || {});
             setPage(location.state.page || 1);
+
+            setTotalPages(location.state.totalPages || 1);
+            setTotalResults(location.state.totalResults || 0);
             setQuery(location.state.query || "");
             setSearched(true);
 
@@ -169,7 +221,7 @@ const SearchPage = () => {
 
     }, [location.search]);
 
-    // ---------------- FILTER DATA ----------------
+    /*---------------- FILTER DATA ----------------
     const filteredResults = results;
 
     const paged = filteredResults.slice(
@@ -177,17 +229,18 @@ const SearchPage = () => {
         page * ITEMS_PER_PAGE
     );
 
-    const totalPages = Math.max(1, Math.ceil(filteredResults.length / ITEMS_PER_PAGE));
+    const totalPages = Math.max(1, Math.ceil(filteredResults.length / ITEMS_PER_PAGE)); */
+
 
     // ---------------- DOWNLOAD ----------------
     const downloadExcel = async () => {
-        if (!filteredResults.length) {
+        if (!results.length) {
             alert("No data available");
             return;
         }
 
         // 1️⃣ Create Excel
-        const worksheet = XLSX.utils.json_to_sheet(filteredResults);
+        const worksheet = XLSX.utils.json_to_sheet(results);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
 
@@ -215,7 +268,7 @@ const SearchPage = () => {
         const formData = new FormData();
         formData.append("file", file, fileName);
         formData.append("name", fileName);
-        formData.append("recordCount", filteredResults.length);
+        formData.append("recordCount", results.length);
 
         try {
             const token = localStorage.getItem("token");
@@ -420,7 +473,7 @@ const SearchPage = () => {
                         </p>
                     </div>
 
-                ) : paged.length === 0 ? (
+                ) : results.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-gray-600">
 
                         <div
@@ -461,7 +514,7 @@ const SearchPage = () => {
                                 {/* BODY */}
                                 <tbody className="divide-y">
 
-                                    {paged.map((item) => (
+                                    {results.map((item) => (
                                         <tr
                                             key={item._id}
                                             className="hover:bg-gray-50 transition duration-200"
@@ -473,11 +526,19 @@ const SearchPage = () => {
                                                 onClick={() => {
                                                     handleEmployeeAccess(item._id);
                                                     navigate(`/dashboard/profile/${item._id}`, {
-                                                        state: { results, filters, page, query, visibleFields },
+                                                        state: {
+                                                            results,
+                                                            filters,
+                                                            page,
+                                                            query,
+                                                            visibleFields,
+                                                            totalPages,
+                                                            totalResults
+                                                        },
                                                     });
                                                 }}
                                             >
-                                                {item.first_name + " " + item.last_name || "-"}
+                                                {`${item.first_name || ""} ${item.last_name || ""}`.trim() || "-"}
                                             </td>
 
                                             <td className="px-6 py-4">{item.designation || "-"}</td>
@@ -550,7 +611,15 @@ const SearchPage = () => {
                                                 <button
                                                     onClick={() =>
                                                         navigate(`/dashboard/profile/${item._id}`, {
-                                                            state: { results, filters, page, query },
+                                                            state: {
+                                                                results,
+                                                                filters,
+                                                                page,
+                                                                query,
+                                                                visibleFields,
+                                                                totalPages,
+                                                                totalResults
+                                                            },
                                                         })
                                                     }
                                                     className="px-4 py-1.5 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
@@ -570,21 +639,35 @@ const SearchPage = () => {
             </div>
 
             {/* ================= PAGINATION ================= */}
-            {searched && totalPages > 1 && (
-                <div className="mt-5 flex justify-center gap-3">
-                    <button onClick={() => setPage(p => p - 1)} disabled={page === 1}>
-                        <ChevronLeft />
-                    </button>
+            {
+                searched && totalPages > 1 && (
+                    <div className="mt-5 flex items-center justify-center gap-4">
 
-                    <span>{page} / {totalPages}</span>
+                        <button
+                            onClick={() => runSearch(query, page - 1)}
+                            disabled={page === 1}
+                            className="p-2 border rounded"
+                        >
+                            <ChevronLeft />
+                        </button>
 
-                    <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages}>
-                        <ChevronRight />
-                    </button>
-                </div>
-            )}
+                        <span className="text-sm font-medium">
+                            Page {page} of {totalPages}
+                        </span>
 
-        </div>
+                        <button
+                            onClick={() => runSearch(query, page + 1)}
+                            disabled={page === totalPages}
+                            className="p-2 border rounded"
+                        >
+                            <ChevronRight />
+                        </button>
+
+                    </div>
+                )
+            }
+
+        </div >
     );
 };
 

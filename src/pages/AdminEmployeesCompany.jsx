@@ -24,6 +24,7 @@ const AddEmployee = () => {
         setLoading(true);
 
         try {
+            console.log(token); // Debug: Check form data before submission
             const res = await fetch("https://corpfinder-backend.onrender.com/employees/add", {
                 method: "POST",
                 headers: {
@@ -66,9 +67,9 @@ const AddEmployee = () => {
 
         const fd = new FormData();
         fd.append("file", file);
-
+        console.log(token); // Debug: Check FormData content
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/employees/upload", {
+            const res = await fetch("http://localhost:5000/employees/upload", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
