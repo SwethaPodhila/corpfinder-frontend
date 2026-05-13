@@ -26,6 +26,7 @@ const SearchPage = () => {
 
     const [totalPages, setTotalPages] = useState(1);
     const [totalResults, setTotalResults] = useState(0);
+    const [downloading, setDownloading] = useState(false);
 
     const handleEmployeeAccess = async (employeeId) => {
         if (chargedEmployees.has(employeeId)) return;
@@ -33,34 +34,35 @@ const SearchPage = () => {
         try {
             let token = localStorage.getItem("token");
 
-            if (!token) {
-                console.log("No token found");
-                return;
-            }
+            if (!token) return;
 
-            // remove quotes if accidentally stored
             token = token.replace(/"/g, "");
 
-            const res = await fetch("https://corpfinder-backend.onrender.com/user/deduct-credits", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ employeeId })
-            });
+            const res = await fetch(
+                "https://corpfinder-backend.onrender.com/user/deduct-credits",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        credits: 1   // 🔥 FIXED
+                    })
+                }
+            );
 
             const data = await res.json();
 
             if (data.success) {
                 setChargedEmployees(prev => new Set(prev).add(employeeId));
-                await fetchCredits(); // 🔥 THIS LINE FIXES EVERYTHING
+                await fetchCredits();
             } else {
-                console.log("Backend rejected:", data);
+                alert(data.msg || "Not enough credits");
             }
 
         } catch (err) {
-            console.log("Request error:", err);
+            console.log(err);
         }
     };
 
@@ -231,12 +233,10 @@ const SearchPage = () => {
 
     const totalPages = Math.max(1, Math.ceil(filteredResults.length / ITEMS_PER_PAGE)); */
 
-
     // ---------------- DOWNLOAD ----------------
-
     const downloadExcel = async () => {
-
         try {
+            setDownloading(true);
 
             let token = localStorage.getItem("token");
 
@@ -247,73 +247,73 @@ const SearchPage = () => {
 
             token = token.replace(/"/g, "");
 
-            // 🔥 FETCH ALL RECORDS
+            // =========================
+            // BUILD QUERY PARAMS
+            // =========================
             const params = new URLSearchParams();
 
-            if (query?.trim()) {
-                params.append("query", query.trim().toLowerCase());
+            const cleanQuery = query?.trim().toLowerCase();
+
+            if (cleanQuery) {
+                params.append("query", cleanQuery);
             }
 
-            if (filters.country) {
-                params.append("country", filters.country);
+            if (filters.country) params.append("country", filters.country);
+            if (filters.state) params.append("state", filters.state);
+            if (filters.city) params.append("city", filters.city);
+            if (filters.designation) params.append("designation", filters.designation);
+            if (filters.industry) params.append("industry", filters.industry);
+
+            params.append("download", "true");
+
+            // =========================
+            // VALIDATION
+            // =========================
+            const requestedRecords = totalResults || 0;
+
+            if (!requestedRecords) {
+                alert("No data available");
+                return;
             }
 
-            if (filters.state) {
-                params.append("state", filters.state);
+            const recordsToDownload = Math.min(requestedRecords, credits);
+
+            if (requestedRecords > credits) {
+                alert(
+                    `⚠️ Not enough credits!\n\n` +
+                    `Available Credits: ${credits}\n` +
+                    `Total Results: ${requestedRecords}\n\n` +
+                    `Only ${credits} records will be downloaded.`
+                );
             }
 
-            if (filters.city) {
-                params.append("city", filters.city);
-            }
-
-            if (filters.designation) {
-                params.append("designation", filters.designation);
-            }
-
-            if (filters.industry) {
-                params.append("industry", filters.industry);
-            }
-
-            // 🔥 VERY IMPORTANT
+            // =========================
+            // FETCH DATA
+            // =========================
             params.append("page", 1);
+            params.append("limit", recordsToDownload);
 
-            // 🔥 FETCH ALL
-            params.append("limit", totalResults);
-
-            const allDataRes = await fetch(
+            const res = await fetch(
                 `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` }
                 }
             );
 
-            const allData = await allDataRes.json();
-
-            const allResults = allData.data || [];
+            const data = await res.json();
+            const allResults = data.data || [];
 
             if (!allResults.length) {
                 alert("No data available");
                 return;
             }
 
-            // 🔥 TOTAL RECORDS
-            const recordsToDownload = allResults.length;
+            const actualRecords = allResults.length;
+            const finalDeduct = Math.min(actualRecords, credits);
 
-            // 🔥 CREDIT CHECK
-            if (credits < recordsToDownload) {
-
-                alert(
-                    `You don't have enough credits.\n\n` +
-                    `Required Credits: ${recordsToDownload}\n` +
-                    `Available Credits: ${credits}`
-                );
-
-                return;
-            }
-
-            // 🔥 DEDUCT CREDITS
+            // =========================
+            // DEDUCT CREDITS (FIXED)
+            // =========================
             const deductRes = await fetch(
                 "https://corpfinder-backend.onrender.com/user/deduct-credits",
                 {
@@ -323,7 +323,7 @@ const SearchPage = () => {
                         Authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        credits: recordsToDownload
+                        credits: finalDeduct
                     })
                 }
             );
@@ -331,85 +331,67 @@ const SearchPage = () => {
             const deductData = await deductRes.json();
 
             if (!deductData.success) {
-
-                alert(
-                    deductData.message ||
-                    "Unable to deduct credits"
-                );
-
+                alert(deductData.msg || "Unable to deduct credits");
                 return;
             }
 
-            // 🔥 REFRESH CREDITS
             await fetchCredits();
 
-            // 🔥 CREATE EXCEL
+            // =========================
+            // CREATE EXCEL
+            // =========================
             const worksheet = XLSX.utils.json_to_sheet(allResults);
-
             const workbook = XLSX.utils.book_new();
-
-            XLSX.utils.book_append_sheet(
-                workbook,
-                worksheet,
-                "Results"
-            );
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
 
             const excelBuffer = XLSX.write(workbook, {
                 bookType: "xlsx",
                 type: "array"
             });
 
-            const safeQuery = (query || "results")
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, "_")
-                .replace(/[^a-z0-9_]/g, "");
-
-            const fileName =
-                `${safeQuery}-${Date.now()}.xlsx`;
-
             const file = new Blob([excelBuffer], {
-                type:
-                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             });
 
-            // 🔥 DOWNLOAD
+            // =========================
+            // FILE NAME FIX (QUERY BASED)
+            // =========================
+            const safeQuery = cleanQuery
+                ? cleanQuery.replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+                : "all_results";
+
+            const fileName = `${safeQuery}_${actualRecords}_records_${Date.now()}.xlsx`;
+
             saveAs(file, fileName);
 
-            // 🔥 SAVE DOWNLOAD HISTORY
+            // =========================
+            // SAVE HISTORY
+            // =========================
             const formData = new FormData();
-
             formData.append("file", file, fileName);
-
             formData.append("name", fileName);
-
-            formData.append(
-                "recordCount",
-                recordsToDownload
-            );
+            formData.append("recordCount", actualRecords);
 
             await fetch(
                 "https://corpfinder-backend.onrender.com/downloads/upload",
                 {
                     method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                     body: formData
                 }
             );
 
-            // 🔥 SUCCESS
             alert(
-                `${recordsToDownload} records downloaded successfully.\n${recordsToDownload} credits deducted.`
+                `✅ Download completed!\n\n` +
+                `Records: ${actualRecords}\n` +
+                `Credits deducted: ${finalDeduct}`
             );
 
         } catch (err) {
-
             console.log("Download failed:", err);
-
-            alert("Something went wrong");
-
+            alert("Download failed");
+        } finally {
+            setDownloading(false);
         }
     };
 
@@ -551,10 +533,21 @@ const SearchPage = () => {
 
                 <button
                     onClick={downloadExcel}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm"
+                    disabled={downloading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm transition 
+        ${downloading ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"}`}
                 >
-                    <Download size={16} />
-                    Export Excel
+                    {downloading ? (
+                        <>
+                            <Loader2 className="animate-spin" size={16} />
+                            Downloading...
+                        </>
+                    ) : (
+                        <>
+                            <Download size={16} />
+                            Export Excel
+                        </>
+                    )}
                 </button>
 
             </div>
@@ -734,9 +727,12 @@ const SearchPage = () => {
                                             </td>
 
                                             {/* ACTION */}
+                                            {/* ACTION */}
                                             <td className="px-6 py-4 text-center">
                                                 <button
-                                                    onClick={() =>
+                                                    onClick={async () => {
+                                                        await handleEmployeeAccess(item._id); // 🔥 1 credit deduct
+
                                                         navigate(`/dashboard/profile/${item._id}`, {
                                                             state: {
                                                                 results,
@@ -747,8 +743,8 @@ const SearchPage = () => {
                                                                 totalPages,
                                                                 totalResults
                                                             },
-                                                        })
-                                                    }
+                                                        });
+                                                    }}
                                                     className="px-4 py-1.5 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition"
                                                 >
                                                     View
