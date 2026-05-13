@@ -14,7 +14,7 @@ const SearchPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    const { fetchCredits } = useCredits();
+    const { credits, fetchCredits } = useCredits();
 
     const [query, setQuery] = useState("");
     const [page, setPage] = useState(1);
@@ -233,47 +233,162 @@ const SearchPage = () => {
 
 
     // ---------------- DOWNLOAD ----------------
+
     const downloadExcel = async () => {
-        if (!results.length) {
-            alert("No data available");
-            return;
-        }
-
-        // 1️⃣ Create Excel
-        const worksheet = XLSX.utils.json_to_sheet(results);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
-
-        const excelBuffer = XLSX.write(workbook, {
-            bookType: "xlsx",
-            type: "array"
-        });
-
-        const safeQuery = (query || "results")
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "_")      // spaces → _
-            .replace(/[^a-z0-9_]/g, ""); // remove special chars
-
-        const fileName = `${safeQuery}-${Date.now()}.xlsx`;
-
-        const file = new Blob([excelBuffer], {
-            type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        });
-
-        // 2️⃣ Download locally
-        saveAs(file, fileName);
-
-        // 3️⃣ Upload to backend
-        const formData = new FormData();
-        formData.append("file", file, fileName);
-        formData.append("name", fileName);
-        formData.append("recordCount", results.length);
 
         try {
-            const token = localStorage.getItem("token");
 
-            const res = await fetch(
+            let token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Please login again");
+                return;
+            }
+
+            token = token.replace(/"/g, "");
+
+            // 🔥 FETCH ALL RECORDS
+            const params = new URLSearchParams();
+
+            if (query?.trim()) {
+                params.append("query", query.trim().toLowerCase());
+            }
+
+            if (filters.country) {
+                params.append("country", filters.country);
+            }
+
+            if (filters.state) {
+                params.append("state", filters.state);
+            }
+
+            if (filters.city) {
+                params.append("city", filters.city);
+            }
+
+            if (filters.designation) {
+                params.append("designation", filters.designation);
+            }
+
+            if (filters.industry) {
+                params.append("industry", filters.industry);
+            }
+
+            // 🔥 VERY IMPORTANT
+            params.append("page", 1);
+
+            // 🔥 FETCH ALL
+            params.append("limit", totalResults);
+
+            const allDataRes = await fetch(
+                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const allData = await allDataRes.json();
+
+            const allResults = allData.data || [];
+
+            if (!allResults.length) {
+                alert("No data available");
+                return;
+            }
+
+            // 🔥 TOTAL RECORDS
+            const recordsToDownload = allResults.length;
+
+            // 🔥 CREDIT CHECK
+            if (credits < recordsToDownload) {
+
+                alert(
+                    `You don't have enough credits.\n\n` +
+                    `Required Credits: ${recordsToDownload}\n` +
+                    `Available Credits: ${credits}`
+                );
+
+                return;
+            }
+
+            // 🔥 DEDUCT CREDITS
+            const deductRes = await fetch(
+                "https://corpfinder-backend.onrender.com/user/deduct-credits",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        credits: recordsToDownload
+                    })
+                }
+            );
+
+            const deductData = await deductRes.json();
+
+            if (!deductData.success) {
+
+                alert(
+                    deductData.message ||
+                    "Unable to deduct credits"
+                );
+
+                return;
+            }
+
+            // 🔥 REFRESH CREDITS
+            await fetchCredits();
+
+            // 🔥 CREATE EXCEL
+            const worksheet = XLSX.utils.json_to_sheet(allResults);
+
+            const workbook = XLSX.utils.book_new();
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Results"
+            );
+
+            const excelBuffer = XLSX.write(workbook, {
+                bookType: "xlsx",
+                type: "array"
+            });
+
+            const safeQuery = (query || "results")
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, "_")
+                .replace(/[^a-z0-9_]/g, "");
+
+            const fileName =
+                `${safeQuery}-${Date.now()}.xlsx`;
+
+            const file = new Blob([excelBuffer], {
+                type:
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            });
+
+            // 🔥 DOWNLOAD
+            saveAs(file, fileName);
+
+            // 🔥 SAVE DOWNLOAD HISTORY
+            const formData = new FormData();
+
+            formData.append("file", file, fileName);
+
+            formData.append("name", fileName);
+
+            formData.append(
+                "recordCount",
+                recordsToDownload
+            );
+
+            await fetch(
                 "https://corpfinder-backend.onrender.com/downloads/upload",
                 {
                     method: "POST",
@@ -284,11 +399,17 @@ const SearchPage = () => {
                 }
             );
 
-            const data = await res.json();
-            console.log("Upload success:", data);
+            // 🔥 SUCCESS
+            alert(
+                `${recordsToDownload} records downloaded successfully.\n${recordsToDownload} credits deducted.`
+            );
 
         } catch (err) {
-            console.log("Upload failed:", err);
+
+            console.log("Download failed:", err);
+
+            alert("Something went wrong");
+
         }
     };
 
@@ -422,7 +543,12 @@ const SearchPage = () => {
             </div>
 
             {/* ================= EXPORT ================= */}
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-between items-center">
+
+                <p className="text-sm text-gray-600 font-medium">
+                    Total Records: {totalResults}
+                </p>
+
                 <button
                     onClick={downloadExcel}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm"
@@ -430,6 +556,7 @@ const SearchPage = () => {
                     <Download size={16} />
                     Export Excel
                 </button>
+
             </div>
 
             {/* ================= RESULTS ================= */}
