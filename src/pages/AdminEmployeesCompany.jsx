@@ -69,7 +69,7 @@ const AddEmployee = () => {
         fd.append("file", file);
         console.log(token); // Debug: Check FormData content
         try {
-            const res = await fetch("http://localhost:5000/employees/upload", {
+            const res = await fetch("https://corpfinder-backend.onrender.com/employees/upload", {
                 method: "POST",
                 headers: { Authorization: `Bearer ${token}` },
                 body: fd
