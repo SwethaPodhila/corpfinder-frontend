@@ -278,7 +278,7 @@ const SearchPage = () => {
             const limitRes =
                 await fetch(
 
-                    "http://localhost:5000/downloads/check-limit",
+                    "https://corpfinder-backend.onrender.com/downloads/check-limit",
 
                     {
                         headers: {
@@ -425,7 +425,7 @@ const SearchPage = () => {
             const res =
                 await fetch(
 
-                    `http://localhost:5000/filters/search?${params.toString()}`,
+                    `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
 
                     {
                         headers: {
@@ -616,7 +616,7 @@ const SearchPage = () => {
             const uploadRes =
                 await fetch(
 
-                    "http://localhost:5000/downloads/upload",
+                    "https://corpfinder-backend.onrender.com/downloads/upload",
 
                     {
                         method: "POST",

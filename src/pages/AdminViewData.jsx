@@ -45,7 +45,7 @@ const ViewData = () => {
     const fetchEmployees = async (page = 1, search = "") => {
         try {
             const res = await fetch(
-                `http://localhost:5000/employees/allEmployees?page=${page}&limit=10&search=${search}`,
+                `https://corpfinder-backend.onrender.com/employees/allEmployees?page=${page}&limit=10&search=${search}`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("adminToken")}`
