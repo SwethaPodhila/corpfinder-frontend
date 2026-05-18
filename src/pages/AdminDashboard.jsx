@@ -29,11 +29,12 @@ const AdminDashboard = () => {
         try {
             const res = await fetch("https://corpfinder-backend.onrender.com/user/users");
             const data = await res.json();
+            console.log("Fetched users:", data);
             setUsers(data);
         } catch (err) {
             console.log(err);
         }
-    };
+    }; 
 
     useEffect(() => {
         fetchUsers();
@@ -157,7 +158,7 @@ const AdminDashboard = () => {
                                             </td>
 
                                             <td className="px-5 py-4 text-gray-700">
-                                                {user.planId === 1 ? "Trial" : "Paid"}
+                                                {user.planName || "Free" }
                                             </td>
 
                                             <td className="px-5 py-4 text-gray-600">

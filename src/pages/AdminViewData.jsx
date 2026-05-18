@@ -14,6 +14,12 @@ const ViewData = () => {
 
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
+    const [totalPages, setTotalPages] = useState(1);
+
+    const handlePageChange = (page) => {
+        setEmpPage(page);
+        fetchEmployees(page, empSearch);
+    };
 
     // 🔐 Admin Info
     useEffect(() => {
@@ -25,34 +31,36 @@ const ViewData = () => {
             setAdminRole(decoded.role);
         }
 
-        fetchEmployees();
+        fetchEmployees(empPage, empSearch);
     }, []);
 
-    // 🔥 Fetch Employees
-    const fetchEmployees = async () => {
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            fetchEmployees(1, empSearch);
+        }, 300);
+
+        return () => clearTimeout(delay);
+    }, [empSearch]);
+
+    const fetchEmployees = async (page = 1, search = "") => {
         try {
-            const res = await fetch("https://corpfinder-backend.onrender.com/employees/allEmployees", {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+            const res = await fetch(
+                `http://localhost:5000/employees/allEmployees?page=${page}&limit=10&search=${search}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+                    }
                 }
-            });
+            );
 
             const data = await res.json();
 
-            console.log("GET RESPONSE:", data);
-
-            // 👇 SAFE HANDLING
-            if (Array.isArray(data)) {
-                setEmployees(data);
-            } else if (Array.isArray(data.employees)) {
-                setEmployees(data.employees);
-            } else {
-                setEmployees([]);
-            }
+            setEmployees(data.employees);
+            setEmpPage(data.page);
+            setTotalPages(data.totalPages);
 
         } catch (err) {
-            console.error("GET ERROR:", err);
-            setEmployees([]);
+            console.error(err);
         }
     };
 
@@ -167,41 +175,11 @@ const ViewData = () => {
         fetchEmployees();
     };
 
-    // 🔍 SEARCH
-    const filtered = employees.filter(emp =>
-        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(empSearch.toLowerCase()) ||
-        emp.company_name?.toLowerCase().includes(empSearch.toLowerCase()) ||
-        emp.personal_email?.toLowerCase().includes(empSearch.toLowerCase())
-    );
-
-    // 📄 PAGINATION
-    // 📄 PAGINATION SETTINGS
-    const recordsPerPage = 10;
-
-    // 🔍 filtered data
-    const filteredEmployees = employees.filter(emp =>
-        `${emp.first_name} ${emp.last_name}`.toLowerCase().includes(empSearch.toLowerCase()) ||
-        emp.company_name?.toLowerCase().includes(empSearch.toLowerCase()) ||
-        emp.personal_email?.toLowerCase().includes(empSearch.toLowerCase())
-    );
-
-    // 📊 total pages
-    const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / recordsPerPage));
-
-    // 🧠 safe page (prevents empty screen bug)
-    const safePage = Math.min(empPage, totalPages);
-
-    // 📍 slice data
-    const startIndex = (safePage - 1) * recordsPerPage;
-
-    const currentEmployees = filteredEmployees.slice(
-        startIndex,
-        startIndex + recordsPerPage
-    );
-
     // 🔁 auto fix invalid page when search changes
     useEffect(() => {
-        setEmpPage(1);
+        if (empSearch) {
+            setEmpPage(1);
+        }
     }, [empSearch]);
 
     useEffect(() => {
@@ -209,6 +187,8 @@ const ViewData = () => {
             setEmpPage(totalPages);
         }
     }, [totalPages]);
+
+    const safePage = Math.min(empPage, totalPages || 1);
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -244,7 +224,7 @@ const ViewData = () => {
                                     value={empSearch}
                                     onChange={(e) => {
                                         setEmpSearch(e.target.value);
-                                        setEmpPage(1);
+                                        fetchEmployees(1, e.target.value);
                                     }}
                                 />
                             </div>
@@ -272,7 +252,7 @@ const ViewData = () => {
                                 </thead>
 
                                 <tbody>
-                                    {currentEmployees.map(emp => (
+                                    {employees.map(emp => (
                                         <tr key={emp._id} className="border-t">
 
                                             <td className="p-3">
@@ -334,21 +314,21 @@ const ViewData = () => {
 
                             {/* Prev */}
                             <button
-                                disabled={safePage === 1}
-                                onClick={() => setEmpPage(safePage - 1)}
+                                disabled={empPage === 1}
+                                onClick={() => handlePageChange(empPage - 1)}
                                 className="px-3 py-1 border rounded disabled:opacity-50"
                             >
                                 Prev
                             </button>
 
-                            {/* Page Numbers (LIMITED VIEW - CLEAN UI) */}
+                            {/* Pages */}
                             {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                .slice(Math.max(0, safePage - 3), safePage + 2)
+                                .slice(Math.max(0, empPage - 3), empPage + 2)
                                 .map((page) => (
                                     <button
                                         key={page}
-                                        onClick={() => setEmpPage(page)}
-                                        className={`px-3 py-1 border rounded ${safePage === page ? "bg-blue-500 text-white" : ""
+                                        onClick={() => handlePageChange(page)}
+                                        className={`px-3 py-1 border rounded ${empPage === page ? "bg-blue-500 text-white" : ""
                                             }`}
                                     >
                                         {page}
@@ -357,8 +337,8 @@ const ViewData = () => {
 
                             {/* Next */}
                             <button
-                                disabled={safePage === totalPages}
-                                onClick={() => setEmpPage(safePage + 1)}
+                                disabled={empPage === totalPages}
+                                onClick={() => handlePageChange(empPage + 1)}
                                 className="px-3 py-1 border rounded disabled:opacity-50"
                             >
                                 Next
