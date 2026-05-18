@@ -233,167 +233,479 @@ const SearchPage = () => {
 
     const totalPages = Math.max(1, Math.ceil(filteredResults.length / ITEMS_PER_PAGE)); */
 
-    // ---------------- DOWNLOAD ----------------
+    // ================= DOWNLOAD EXCEL =================
+
+    // ================= DOWNLOAD EXCEL =================
+    // ================= DOWNLOAD EXCEL =================
+
     const downloadExcel = async () => {
+
         try {
+
+            console.log("🚀 DOWNLOAD STARTED");
+
             setDownloading(true);
 
-            let token = localStorage.getItem("token");
+            // =========================================
+            // TOKEN
+            // =========================================
+
+            let token =
+                localStorage.getItem("token");
 
             if (!token) {
+
                 alert("Please login again");
+
                 return;
             }
 
-            token = token.replace(/"/g, "");
+            token =
+                token.replace(/"/g, "");
 
-            // =========================
-            // BUILD QUERY PARAMS
-            // =========================
-            const params = new URLSearchParams();
+            console.log(
+                "✅ TOKEN READY"
+            );
 
-            const cleanQuery = query?.trim().toLowerCase();
+            // =========================================
+            // CHECK DOWNLOAD LIMIT
+            // =========================================
+
+            console.log(
+                "✅ CHECKING DOWNLOAD LIMIT"
+            );
+
+            const limitRes =
+                await fetch(
+
+                    "http://localhost:5000/downloads/check-limit",
+
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+            const limitData =
+                await limitRes.json();
+
+            console.log(
+                "✅ LIMIT RESPONSE",
+                limitData
+            );
+
+            // =========================================
+            // LIMIT FAILED
+            // =========================================
+
+            if (!limitData.success) {
+
+                alert(
+                    limitData.msg
+                );
+
+                return;
+            }
+
+            // =========================================
+            // ALLOWED RECORDS
+            // =========================================
+
+            const allowedRecords =
+                limitData.allowedRecords;
+
+            console.log(
+                "✅ ALLOWED RECORDS",
+                allowedRecords
+            );
+
+            if (allowedRecords <= 0) {
+
+                alert(
+                    "Download limit completed"
+                );
+
+                return;
+            }
+
+            // =========================================
+            // QUERY PARAMS
+            // =========================================
+
+            const params =
+                new URLSearchParams();
+
+            const cleanQuery =
+                query?.trim()
+                    ?.toLowerCase();
 
             if (cleanQuery) {
-                params.append("query", cleanQuery);
-            }
 
-            if (filters.country) params.append("country", filters.country);
-            if (filters.state) params.append("state", filters.state);
-            if (filters.city) params.append("city", filters.city);
-            if (filters.designation) params.append("designation", filters.designation);
-            if (filters.industry) params.append("industry", filters.industry);
-
-            params.append("download", "true");
-
-            // =========================
-            // VALIDATION
-            // =========================
-            const requestedRecords = totalResults || 0;
-
-            if (!requestedRecords) {
-                alert("No data available");
-                return;
-            }
-
-            const recordsToDownload = Math.min(requestedRecords, credits);
-
-            if (requestedRecords > credits) {
-                alert(
-                    `⚠️ Not enough credits!\n\n` +
-                    `Available Credits: ${credits}\n` +
-                    `Total Results: ${requestedRecords}\n\n` +
-                    `Only ${credits} records will be downloaded.`
+                params.append(
+                    "query",
+                    cleanQuery
                 );
             }
 
-            // =========================
-            // FETCH DATA
-            // =========================
-            params.append("page", 1);
-            params.append("limit", recordsToDownload);
+            if (filters.country) {
 
-            const res = await fetch(
-                `https://corpfinder-backend.onrender.com/filters/search?${params.toString()}`,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
+                params.append(
+                    "country",
+                    filters.country
+                );
+            }
+
+            if (filters.state) {
+
+                params.append(
+                    "state",
+                    filters.state
+                );
+            }
+
+            if (filters.city) {
+
+                params.append(
+                    "city",
+                    filters.city
+                );
+            }
+
+            if (filters.designation) {
+
+                params.append(
+                    "designation",
+                    filters.designation
+                );
+            }
+
+            if (filters.industry) {
+
+                params.append(
+                    "industry",
+                    filters.industry
+                );
+            }
+
+            params.append(
+                "download",
+                "true"
             );
 
-            const data = await res.json();
-            const allResults = data.data || [];
+            // =========================================
+            // IMPORTANT
+            // ONLY ALLOWED RECORDS
+            // =========================================
+
+            params.append(
+                "page",
+                1
+            );
+
+            params.append(
+                "limit",
+                allowedRecords
+            );
+
+            console.log(
+                "✅ FINAL LIMIT",
+                allowedRecords
+            );
+
+            // =========================================
+            // FETCH SEARCH DATA
+            // =========================================
+
+            console.log(
+                "✅ CALLING SEARCH API"
+            );
+
+            const res =
+                await fetch(
+
+                    `http://localhost:5000/filters/search?${params.toString()}`,
+
+                    {
+                        headers: {
+                            Authorization:
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+            const data =
+                await res.json();
+
+            console.log(
+                "✅ SEARCH RESPONSE",
+                data
+            );
+
+            if (!data.success) {
+
+                alert(
+                    data.msg ||
+                    "Unable to download"
+                );
+
+                return;
+            }
+
+            // =========================================
+            // RESULTS
+            // =========================================
+
+            const allResults =
+                data.data || [];
 
             if (!allResults.length) {
-                alert("No data available");
+
+                alert(
+                    "No data available"
+                );
+
                 return;
             }
 
-            const actualRecords = allResults.length;
-            const finalDeduct = Math.min(actualRecords, credits);
+            // =========================================
+            // ACTUAL RECORDS
+            // =========================================
 
-            // =========================
-            // DEDUCT CREDITS (FIXED)
-            // =========================
-            const deductRes = await fetch(
-                "https://corpfinder-backend.onrender.com/user/deduct-credits",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        credits: finalDeduct
-                    })
-                }
+            const actualRecords =
+                allResults.length;
+
+            console.log(
+                "✅ ACTUAL RECORDS",
+                actualRecords
             );
 
-            const deductData = await deductRes.json();
+            // =========================================
+            // CREATE EXCEL
+            // =========================================
 
-            if (!deductData.success) {
-                alert(deductData.msg || "Unable to deduct credits");
+            console.log(
+                "✅ CREATING EXCEL"
+            );
+
+            const worksheet =
+                XLSX.utils.json_to_sheet(
+                    allResults
+                );
+
+            const workbook =
+                XLSX.utils.book_new();
+
+            XLSX.utils.book_append_sheet(
+
+                workbook,
+
+                worksheet,
+
+                "Results"
+            );
+
+            const excelBuffer =
+                XLSX.write(
+
+                    workbook,
+
+                    {
+                        bookType:
+                            "xlsx",
+
+                        type:
+                            "array"
+                    }
+                );
+
+            const blob =
+                new Blob(
+
+                    [excelBuffer],
+
+                    {
+                        type:
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    }
+                );
+
+            // =========================================
+            // FILE NAME
+            // =========================================
+
+            const safeQuery =
+                cleanQuery
+
+                    ? cleanQuery
+                        .replace(/\s+/g, "_")
+                        .replace(/[^a-z0-9_]/g, "")
+
+                    : "all_results";
+
+            const fileName =
+                `${safeQuery}_${actualRecords}_records_${Date.now()}.xlsx`;
+
+            console.log(
+                "✅ FILE NAME",
+                fileName
+            );
+
+            // =========================================
+            // SAVE FILE
+            // =========================================
+
+            saveAs(
+                blob,
+                fileName
+            );
+
+            console.log(
+                "✅ FILE DOWNLOADED"
+            );
+
+            // =========================================
+            // CREATE FILE OBJECT
+            // =========================================
+
+            const excelFile =
+                new File(
+
+                    [blob],
+
+                    fileName,
+
+                    {
+                        type:
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    }
+                );
+
+            // =========================================
+            // FORM DATA
+            // =========================================
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "file",
+                excelFile
+            );
+
+            formData.append(
+                "name",
+                fileName
+            );
+
+            formData.append(
+                "recordCount",
+                actualRecords
+            );
+
+            console.log(
+                "✅ CALLING UPLOAD API"
+            );
+
+            // =========================================
+            // SAVE DOWNLOAD HISTORY
+            // DEDUCT CREDITS
+            // =========================================
+
+            const uploadRes =
+                await fetch(
+
+                    "http://localhost:5000/downloads/upload",
+
+                    {
+                        method: "POST",
+
+                        headers: {
+                            Authorization:
+                                `Bearer ${token}`
+                        },
+
+                        body:
+                            formData
+                    }
+                );
+
+            const uploadData =
+                await uploadRes.json();
+
+            console.log(
+                "✅ UPLOAD RESPONSE",
+                uploadData
+            );
+
+            // =========================================
+            // FAILED
+            // =========================================
+
+            if (!uploadData.success) {
+
+                alert(
+                    uploadData.msg ||
+                    "Download failed"
+                );
+
                 return;
             }
+
+            // =========================================
+            // REFRESH CREDITS
+            // =========================================
 
             await fetchCredits();
 
-            // =========================
-            // CREATE EXCEL
-            // =========================
-            const worksheet = XLSX.utils.json_to_sheet(allResults);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
-
-            const excelBuffer = XLSX.write(workbook, {
-                bookType: "xlsx",
-                type: "array"
-            });
-
-            const file = new Blob([excelBuffer], {
-                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            });
-
-            // =========================
-            // FILE NAME FIX (QUERY BASED)
-            // =========================
-            const safeQuery = cleanQuery
-                ? cleanQuery.replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
-                : "all_results";
-
-            const fileName = `${safeQuery}_${actualRecords}_records_${Date.now()}.xlsx`;
-
-            saveAs(file, fileName);
-
-            // =========================
-            // SAVE HISTORY
-            // =========================
-            const formData = new FormData();
-            formData.append("file", file, fileName);
-            formData.append("name", fileName);
-            formData.append("recordCount", actualRecords);
-
-            await fetch(
-                "https://corpfinder-backend.onrender.com/downloads/upload",
-                {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${token}` },
-                    body: formData
-                }
-            );
+            // =========================================
+            // SUCCESS MESSAGE
+            // =========================================
 
             alert(
-                `✅ Download completed!\n\n` +
-                `Records: ${actualRecords}\n` +
-                `Credits deducted: ${finalDeduct}`
+
+                `✅ Download completed!
+
+Records Downloaded:
+${uploadData.downloaded}
+
+Credits Deducted:
+${uploadData.downloaded}
+
+Remaining Credits:
+${uploadData.creditsLeft}
+
+Remaining Limit:
+${uploadData.remainingLimit}`
+            );
+
+            console.log(
+                "✅ DOWNLOAD FINISHED SUCCESSFULLY"
             );
 
         } catch (err) {
-            console.log("Download failed:", err);
-            alert("Download failed");
+
+            console.log(
+                "❌ DOWNLOAD ERROR",
+                err
+            );
+
+            alert(
+                "Download failed"
+            );
+
         } finally {
+
             setDownloading(false);
+
+            console.log(
+                "🏁 DOWNLOAD PROCESS FINISHED"
+            );
         }
     };
+
+    
 
     useEffect(() => {
         const hasFilters =
