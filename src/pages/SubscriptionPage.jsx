@@ -73,15 +73,15 @@ const SubscriptionPage = () => {
             const data = await res.json();
             console.log("ORDER RESPONSE:", data);
 
-            if (!data.paymentSessionId) {
-                console.log("❌ paymentSessionId missing");
+            if (!data.subscriptionSessionId) {
+                console.log("❌ subscriptionSessionId missing");
                 return;
             }
 
             const cashfree = await load({ mode: "production" });
 
             cashfree.checkout({
-                paymentSessionId: data.paymentSessionId,
+                subscriptionSessionId: data.subscriptionSessionId,
                 redirectTarget: "_modal"
             });
 
@@ -174,6 +174,13 @@ const SubscriptionPage = () => {
                                 </li>
                             ))}
                         </ul>
+
+                        {/* AutoPay Info */}
+                        {plan.name.toLowerCase() !== "free" && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                                Auto-renew enabled. You authorize recurring payments.
+                            </p>
+                        )}
 
                         <button
                             onClick={() => handleUpgrade(plan)}
