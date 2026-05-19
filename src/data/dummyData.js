@@ -73,7 +73,7 @@ export const pricingPlans = [
             "Unlimited search",
             "Basic filters",
             "50 contact unlocks",
-            "Download up to 50 contacts",
+            "Download up to 50 contacts/month",
             "Blurred contact details"
         ],
         cta: "Start Free"
@@ -87,7 +87,8 @@ export const pricingPlans = [
             "Unlimited search",
             "Advanced filters",
             "2500 contact unlocks",
-            "Download up to 2500 contacts",
+            "Download up to 2500 contacts/month",
+            "500 profile dowloads/day",
             "Email, Phone, LinkedIn access",
             "Export to Excel"
         ],
@@ -102,8 +103,9 @@ export const pricingPlans = [
         features: [
             "Everything in Pro",
             "5000 contact unlocks",
-            "Download up to 5000 contacts",
+            "Download up to 5000 contacts/month",
             "Full profile insights",
+            "1000 profile downloads/day",
             "Bulk export (Excel + CSV)",
             "API access"
         ],
