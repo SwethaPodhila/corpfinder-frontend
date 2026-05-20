@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, Zap } from "lucide-react";
 import { pricingPlans } from "../data/dummyData";
-import { load } from "@cashfreepayments/cashfree-js";
+//import { load } from "@cashfreepayments/cashfree-js";
 
 const SubscriptionPage = () => {
 
@@ -50,6 +50,7 @@ const SubscriptionPage = () => {
     // 🔥 PAYMENT HANDLER
     const handleUpgrade = async (plan) => {
         try {
+
             console.log("PLAN CLICKED:", plan);
 
             if (!plan?.name) {
@@ -59,33 +60,34 @@ const SubscriptionPage = () => {
 
             const token = localStorage.getItem("token");
 
-            const res = await fetch("https://corpfinder-backend.onrender.com/payment/create-order", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    planName: plan.name.toLowerCase()
-                })
-            });
+            const res = await fetch(
+                "https://corpfinder-backend.onrender.com/payment/create-order",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        planName: plan.name.toLowerCase()
+                    })
+                }
+            );
 
             const data = await res.json();
-            console.log("ORDER RESPONSE:", data);
 
-            if (!data.subscriptionSessionId) {
-                console.log("❌ subscriptionSessionId missing");
+            console.log("SUBSCRIPTION RESPONSE:", data);
+
+            if (!data.paymentLink) {
+                console.log("❌ paymentLink missing");
                 return;
             }
 
-            const cashfree = await load({ mode: "production" });
-
-            cashfree.checkout({
-                subscriptionSessionId: data.subscriptionSessionId,
-                redirectTarget: "_modal"
-            });
+            // redirect to cashfree hosted page
+            window.location.href = data.paymentLink;
 
         } catch (err) {
+
             console.log("Payment error:", err);
         }
     };
