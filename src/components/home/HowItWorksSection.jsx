@@ -24,7 +24,7 @@ const steps = [
 ];
 
 const HowItWorksSection = () => (
-    <section className="bg-card py-24 border-y">
+    <section id="how-it-works" className="bg-card py-24 border-y">
         <div className="container mx-auto px-6">
 
             {/* Heading */}

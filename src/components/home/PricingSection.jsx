@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { pricingPlans } from "../../data/dummyData"; // ✅ FIXED PATH
 
 const PricingSection = () => (
-    <section className="bg-card py-24 border-y">
+    <section id="pricing" className="bg-card py-24 border-y">
         <div className="container mx-auto px-6">
 
             {/* Heading */}

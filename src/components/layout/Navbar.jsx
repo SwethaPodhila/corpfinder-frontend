@@ -73,7 +73,7 @@ const Navbar = () => {
                                     onClick={() => setOpen(false)}
                                 >
                                     Features
-                                </a>
+                                </a> 
 
                                 <a
                                     href="#pricing"

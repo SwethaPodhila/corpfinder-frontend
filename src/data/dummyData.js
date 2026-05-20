@@ -105,7 +105,7 @@ export const pricingPlans = [
             "5000 contact unlocks",
             "Download up to 5000 contacts/month",
             "Full profile insights",
-            "1000 profile downloads/day",
+            "500 profile downloads/day",
             "Bulk export (Excel + CSV)",
             "API access"
         ],
