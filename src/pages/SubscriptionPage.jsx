@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, Zap } from "lucide-react";
 import { pricingPlans } from "../data/dummyData";
-//import { load } from "@cashfreepayments/cashfree-js";
+import { load } from "@cashfreepayments/cashfree-js";
 
 const SubscriptionPage = () => {
 
@@ -48,9 +48,10 @@ const SubscriptionPage = () => {
     }, []);
 
     // 🔥 PAYMENT HANDLER
+
+    // 🔥 PAYMENT HANDLER
     const handleUpgrade = async (plan) => {
         try {
-
             console.log("PLAN CLICKED:", plan);
 
             if (!plan?.name) {
@@ -78,20 +79,25 @@ const SubscriptionPage = () => {
 
             console.log("SUBSCRIPTION RESPONSE:", data);
 
-            if (!data.paymentLink) {
-                console.log("❌ paymentLink missing");
+            if (!data.paymentSessionId) {
+                console.log("❌ paymentSessionId missing");
                 return;
             }
 
-            // redirect to cashfree hosted page
-            window.location.href = data.paymentLink;
+            const cashfree = await load({
+                mode: "production" // sandbox ayithe "sandbox"
+            });
+
+            await cashfree.checkout({
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: "_self"
+            });
 
         } catch (err) {
-
             console.log("Payment error:", err);
         }
     };
-
+    
     // 🔥 CALCULATE PROGRESS
     const used = totalCredits - credits;
     const percent = (used / totalCredits) * 100;
