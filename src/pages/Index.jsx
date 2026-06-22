@@ -9,6 +9,7 @@ import HowItWorksSection from "../components/home/HowItWorksSection";
 import DemoSection from "../components/home/DemoSection";
 import PricingSection from "../components/home/PricingSection";
 import CTASection from "../components/home/CTASection";
+import Contact from "../components/home/Contact";
 
 const Index = () => {
     return (
@@ -20,8 +21,10 @@ const Index = () => {
             <HowItWorksSection />
             <DemoSection />
             <PricingSection />
+            <Contact />
             <CTASection />
             <Footer />
+
         </div>
     );
 };

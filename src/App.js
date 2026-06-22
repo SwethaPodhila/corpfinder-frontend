@@ -17,6 +17,9 @@ import AdminAddEmployee from "./pages/AdminAddEmployee";
 import AddCompany from "./pages/AdminAddCompany";
 import AdminViewData from "./pages/AdminViewData";
 import AdminAddingFullEmployees from "./pages/AdminEmployeesCompany";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import RefundPolicy from "./pages/RefundPolicy";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -25,6 +28,7 @@ import HistoryPage from "./pages/HistoryPage";
 import DownloadsPage from "./pages/DownloadsPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import ProfilePage from "./pages/FullProfile";
+import Contact from "./components/home/Contact";
 
 import NotFound from "./pages/NotFound";
 
@@ -45,8 +49,11 @@ const App = () => {
             <Route path="/admin/add-employee" element={<AdminAddEmployee />} />
             <Route path="/admin/add-company" element={<AddCompany />} />
             <Route path="/admin/view-data" element={<AdminViewData />} />
-
             <Route path="/admin/add-employees" element={<AdminAddingFullEmployees />} />
+
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
 
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />

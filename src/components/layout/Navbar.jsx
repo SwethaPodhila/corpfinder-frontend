@@ -39,6 +39,9 @@ const Navbar = () => {
                             <a href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-black">
                                 How It Works
                             </a>
+                            <a href="#contact" className="text-sm font-medium text-gray-600 hover:text-black">
+                                Contact
+                            </a>
                         </>
                     )}
 
@@ -73,7 +76,7 @@ const Navbar = () => {
                                     onClick={() => setOpen(false)}
                                 >
                                     Features
-                                </a> 
+                                </a>
 
                                 <a
                                     href="#pricing"

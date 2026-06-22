@@ -97,7 +97,6 @@ const SubscriptionPage = () => {
             console.log("Payment error:", err);
         }
     };
-    
     // 🔥 CALCULATE PROGRESS
     const used = totalCredits - credits;
     const percent = (used / totalCredits) * 100;
