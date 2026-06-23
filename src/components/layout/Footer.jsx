@@ -127,7 +127,7 @@ const Footer = () => {
 
                     <div className="flex items-center gap-5">
                         <a
-                            href="https://facebook.com"
+                            href="https://www.facebook.com/profile.php?id=61591137336427"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition"
@@ -136,7 +136,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://twitter.com"
+                            href="https://x.com/GrowMatrixtbiz"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition"
@@ -145,7 +145,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://linkedin.com"
+                            href="https://www.linkedin.com/in/grow-matrix-145030419/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition"
@@ -154,7 +154,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://youtube.com"
+                            href="https://www.youtube.com/@GrowMatrix-l3r"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition"
@@ -163,7 +163,7 @@ const Footer = () => {
                         </a>
 
                         <a
-                            href="https://pinterest.com"
+                            href="https://pin.it/70XQneABu"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-muted-foreground hover:text-primary transition"
