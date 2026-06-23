@@ -1,15 +1,36 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Building2 } from "lucide-react";
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+
     const isHome = location.pathname === "/";
+
+    // 🔥 Smooth scroll function (WORKS FROM ANY PAGE)
+    const scrollToSection = (id) => {
+        setOpen(false);
+
+        if (!isHome) {
+            navigate("/");
+            setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }, 100);
+        } else {
+            document.getElementById(id)?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    };
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-white/80 backdrop-blur">
-
             <div className="container mx-auto flex items-center justify-between px-6 py-4">
 
                 {/* Logo */}
@@ -26,24 +47,25 @@ const Navbar = () => {
                 {/* Desktop Menu */}
                 <div className="hidden items-center gap-8 md:flex">
 
-                    {isHome && (
-                        <>
-                            <a href="#features" className="text-sm font-medium text-gray-600 hover:text-black">
-                                Features
-                            </a>
+                    <button onClick={() => scrollToSection("features")}
+                        className="text-sm font-medium text-gray-600 hover:text-black">
+                        Features
+                    </button>
 
-                            <a href="#pricing" className="text-sm font-medium text-gray-600 hover:text-black">
-                                Pricing
-                            </a>
+                    <button onClick={() => scrollToSection("pricing")}
+                        className="text-sm font-medium text-gray-600 hover:text-black">
+                        Pricing
+                    </button>
 
-                            <a href="#how-it-works" className="text-sm font-medium text-gray-600 hover:text-black">
-                                How It Works
-                            </a>
-                            <a href="#contact" className="text-sm font-medium text-gray-600 hover:text-black">
-                                Contact
-                            </a>
-                        </>
-                    )}
+                    <button onClick={() => scrollToSection("how-it-works")}
+                        className="text-sm font-medium text-gray-600 hover:text-black">
+                        How It Works
+                    </button>
+
+                    <button onClick={() => scrollToSection("contact")}
+                        className="text-sm font-medium text-gray-600 hover:text-black">
+                        Contact
+                    </button>
 
                     <Link to="/login" className="btn-outline-primary text-sm px-5 py-2">
                         Log In
@@ -55,10 +77,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Mobile Menu Button */}
-                <button
-                    className="md:hidden"
-                    onClick={() => setOpen(!open)}
-                >
+                <button className="md:hidden" onClick={() => setOpen(!open)}>
                     {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </button>
             </div>
@@ -68,25 +87,25 @@ const Navbar = () => {
                 <div className="border-t bg-white px-6 py-4 md:hidden">
                     <div className="flex flex-col gap-3">
 
-                        {isHome && (
-                            <>
-                                <a
-                                    href="#features"
-                                    className="text-sm text-gray-600"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    Features
-                                </a>
+                        <button onClick={() => scrollToSection("features")}
+                            className="text-sm text-gray-600 text-left">
+                            Features
+                        </button>
 
-                                <a
-                                    href="#pricing"
-                                    className="text-sm text-gray-600"
-                                    onClick={() => setOpen(false)}
-                                >
-                                    Pricing
-                                </a>
-                            </>
-                        )}
+                        <button onClick={() => scrollToSection("pricing")}
+                            className="text-sm text-gray-600 text-left">
+                            Pricing
+                        </button>
+
+                        <button onClick={() => scrollToSection("how-it-works")}
+                            className="text-sm text-gray-600 text-left">
+                            How It Works
+                        </button>
+
+                        <button onClick={() => scrollToSection("contact")}
+                            className="text-sm text-gray-600 text-left">
+                            Contact
+                        </button>
 
                         <Link
                             to="/login"

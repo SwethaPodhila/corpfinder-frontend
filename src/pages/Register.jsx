@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Building2, Eye, EyeOff } from "lucide-react";
 import authImg from "../assets/auth-illustration.jpg";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 
 const Register = () => {
     const [form, setForm] = useState({
@@ -102,7 +104,7 @@ const Register = () => {
             localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(data.user));
 
-           // alert("Account verified 🎉");
+            // alert("Account verified 🎉");
 
             navigate("/dashboard"); // direct dashboard ki vellachu
 
@@ -126,164 +128,168 @@ const Register = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <>
+            <Navbar />
+            <div className="flex min-h-screen">
 
-            {/* LEFT IMAGE (NO CHANGE) */}
-            <div className="hidden w-1/2 lg:block relative">
-                <img
-                    src={authImg}
-                    alt="Register"
-                    className="h-full w-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 to-indigo-600/40 flex items-end p-12">
-                    <div>
-                        <h2 className="font-heading text-3xl font-bold text-primary-foreground">
-                            Join CorpFinder
-                        </h2>
-                        <p className="mt-2 text-indigo-100">
-                            Create your free account and start discovering.
-                        </p>
+                {/* LEFT IMAGE (NO CHANGE) */}
+                <div className="hidden w-1/2 lg:block relative">
+                    <img
+                        src={authImg}
+                        alt="Register"
+                        className="h-full w-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 to-indigo-600/40 flex items-end p-12">
+                        <div>
+                            <h2 className="font-heading text-3xl font-bold text-primary-foreground">
+                                Join CorpFinder
+                            </h2>
+                            <p className="mt-2 text-indigo-100">
+                                Create your free account and start discovering.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* RIGHT FORM (NO UI CHANGE) */}
-            <div className="flex flex-1 items-center justify-center p-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md"
-                >
-                    <Link to="/" className="mb-8 flex items-center gap-2">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
-                            <Building2 className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <span className="text-xl font-bold font-heading">
-                            CorpFinder
-                        </span>
+                {/* RIGHT FORM (NO UI CHANGE) */}
+                <div className="flex flex-1 items-center justify-center p-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="w-full max-w-md"
+                    >
+                        <Link to="/" className="mb-4 flex items-center gap-2">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
+                                <Building2 className="h-5 w-5 text-primary-foreground" />
+                            </div>
+                            <span className="text-xl font-bold font-heading">
+                                CorpFinder
+                            </span>
 
-                    </Link>
+                        </Link>
 
-                    <h1 className="font-heading text-2xl font-bold text-foreground">
-                        Create your account
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                        Start with a free plan. No credit card required.
-                    </p>
+                        <h1 className="font-heading text-2xl font-bold text-foreground">
+                            Create your account
+                        </h1>
+                        <p className="mt-2 text-muted-foreground">
+                            Start with a free plan. No credit card required.
+                        </p>
 
-                    {/* ================= REGISTER FORM ================= */}
-                    {step === "register" && (
-                        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                        {/* ================= REGISTER FORM ================= */}
+                        {step === "register" && (
+                            <form onSubmit={handleSubmit} className="mt-8 space-y-4">
 
-                            <input
-                                type="text"
-                                value={form.name}
-                                onChange={(e) => update("name", e.target.value)}
-                                className="input-styled"
-                                placeholder="Full Name"
-                                required
-                            />
-
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={(e) => update("email", e.target.value)}
-                                className="input-styled"
-                                placeholder="Email"
-                                required
-                            />
-
-                            <input
-                                type="text"
-                                value={form.phone}
-                                onChange={(e) => update("phone", e.target.value)}
-                                className="input-styled"
-                                placeholder="Phone Number"
-                                required
-                            />
-
-                            <div className="relative">
                                 <input
-                                    type={showPw ? "text" : "password"}
-                                    value={form.password}
-                                    onChange={(e) => update("password", e.target.value)}
-                                    className="input-styled pr-10"
-                                    placeholder="Password"
+                                    type="text"
+                                    value={form.name}
+                                    onChange={(e) => update("name", e.target.value)}
+                                    className="input-styled"
+                                    placeholder="Full Name"
                                     required
                                 />
 
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    onChange={(e) => update("email", e.target.value)}
+                                    className="input-styled"
+                                    placeholder="Email"
+                                    required
+                                />
+
+                                <input
+                                    type="text"
+                                    value={form.phone}
+                                    onChange={(e) => update("phone", e.target.value)}
+                                    className="input-styled"
+                                    placeholder="Phone Number"
+                                    required
+                                />
+
+                                <div className="relative">
+                                    <input
+                                        type={showPw ? "text" : "password"}
+                                        value={form.password}
+                                        onChange={(e) => update("password", e.target.value)}
+                                        className="input-styled pr-10"
+                                        placeholder="Password"
+                                        required
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPw(!showPw)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                    >
+                                        {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+
+                                <input
+                                    type="password"
+                                    value={form.confirm}
+                                    onChange={(e) => update("confirm", e.target.value)}
+                                    className="input-styled"
+                                    placeholder="Confirm Password"
+                                    required
+                                />
+
+                                <button type="submit" className="btn-primary w-full py-3.5">
+                                    Create Account
+                                </button>
+                                <p className="mt-6 text-center text-sm text-muted-foreground">
+                                    Already have an account?{" "}
+                                    <Link
+                                        to="/login"
+                                        className="font-semibold text-primary hover:underline"
+                                    >
+                                        Login here
+                                    </Link>
+                                </p>
+                            </form>
+                        )}
+
+                        {/* ================= OTP SECTION (ONLY ADDED) ================= */}
+                        {step === "otp" && (
+                            <div className="mt-6 space-y-4">
+
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    className="input-styled"
+                                    placeholder="Enter OTP"
+                                />
+
                                 <button
-                                    type="button"
-                                    onClick={() => setShowPw(!showPw)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                                    onClick={verifyOtp}
+                                    className="btn-primary w-full py-3"
                                 >
-                                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    Verify OTP
+                                </button>
+
+                                <p className="text-sm text-muted-foreground">
+                                    Time left: {time}s
+                                </p>
+
+                                <button
+                                    disabled={!canResend}
+                                    onClick={resendOtp}
+                                    className={`w-full py-2 rounded ${canResend
+                                        ? "bg-green-500 text-white"
+                                        : "bg-gray-300"
+                                        }`}
+                                >
+                                    Resend OTP
                                 </button>
                             </div>
+                        )}
 
-                            <input
-                                type="password"
-                                value={form.confirm}
-                                onChange={(e) => update("confirm", e.target.value)}
-                                className="input-styled"
-                                placeholder="Confirm Password"
-                                required
-                            />
-
-                            <button type="submit" className="btn-primary w-full py-3.5">
-                                Create Account
-                            </button>
-                            <p className="mt-6 text-center text-sm text-muted-foreground">
-                                Already have an account?{" "}
-                                <Link
-                                    to="/login"
-                                    className="font-semibold text-primary hover:underline"
-                                >
-                                    Login here
-                                </Link>
-                            </p>
-                        </form>
-                    )}
-
-                    {/* ================= OTP SECTION (ONLY ADDED) ================= */}
-                    {step === "otp" && (
-                        <div className="mt-6 space-y-4">
-
-                            <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                className="input-styled"
-                                placeholder="Enter OTP"
-                            />
-
-                            <button
-                                onClick={verifyOtp}
-                                className="btn-primary w-full py-3"
-                            >
-                                Verify OTP
-                            </button>
-
-                            <p className="text-sm text-muted-foreground">
-                                Time left: {time}s
-                            </p>
-
-                            <button
-                                disabled={!canResend}
-                                onClick={resendOtp}
-                                className={`w-full py-2 rounded ${canResend
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-300"
-                                    }`}
-                            >
-                                Resend OTP
-                            </button>
-                        </div>
-                    )}
-
-                </motion.div>
+                    </motion.div>
+                </div>
             </div>
-        </div>
+            <Footer />
+        </>
     );
 };
 
