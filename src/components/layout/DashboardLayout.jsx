@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { useCredits } from "../../context/CreditsContext";
+import { ChevronDown } from "lucide-react";
 import {
     LayoutDashboard,
     Search,
     Clock,
     Download,
     CreditCard,
-    Bell,
     Building2,
-    LogOut,
     Menu
 } from "lucide-react";
 
@@ -25,7 +24,24 @@ const DashboardLayout = () => {
     const location = useLocation();
     const { credits } = useCredits();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : { fullName: "user name" };
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+    const user = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : { fullName: "user name" };
+
+    // close dropdown on outside click
+    useEffect(() => {
+        const handleClick = () => setUserMenuOpen(false);
+        if (userMenuOpen) window.addEventListener("click", handleClick);
+
+        return () => window.removeEventListener("click", handleClick);
+    }, [userMenuOpen]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+    };
 
     return (
         <div className="flex min-h-screen bg-background">
@@ -70,17 +86,6 @@ const DashboardLayout = () => {
                         </Link>
                     ))}
                 </nav>
-
-                {/* Logout */}
-                <div className="border-t p-4">
-                    <Link
-                        to="/login"
-                        className="sidebar-link text-red-500 hover:bg-red-100"
-                    >
-                        <LogOut className="h-4 w-4" />
-                        Logout
-                    </Link>
-                </div>
             </aside>
 
             {/* Main Content */}
@@ -101,24 +106,61 @@ const DashboardLayout = () => {
 
                     {/* Right Side */}
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-white shadow-sm hover:shadow-md transition">
+
+                        {/* Credits */}
+                        <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-white shadow-sm">
                             <CreditCard className="h-5 w-5 text-cyan-600" />
-                            <div className="flex flex-col leading-tight">
-                                <span className="text-sm font-semibold text-gray-800">
-                                    {credits} Credits
-                                </span>
-                            </div>
+                            <span className="text-sm font-semibold text-gray-800">
+                                {credits} Credits
+                            </span>
                         </div>
-                        {/* Notification */}
-                       
-                        {/* User */}
-                        <div className="flex items-center gap-3 rounded-xl bg-gray-100 px-3 py-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                                {user.fullName
-                                    .split(" ")
-                                    .map((n) => n[0])}
-                            </div>
-                            <span className="text-sm font-medium">{user.fullName}</span>
+
+                        {/* User Dropdown */}
+                        <div className="relative">
+
+                            {/* User Button */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setUserMenuOpen(!userMenuOpen);
+                                }}
+                                className="flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2"
+                            >
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                                    {user.fullName.split(" ").map((n) => n[0])}
+                                </div>
+
+                                <span className="text-sm font-medium">
+                                    {user.fullName}
+                                </span>
+
+                                {/* Dropdown icon */}
+                                <ChevronDown
+                                    className={`h-4 w-4 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""
+                                        }`}
+                                />
+                            </button>
+
+                            {/* Dropdown */}
+                            {userMenuOpen && (
+                                <div className="absolute right-0 mt-2 w-40 rounded-xl border bg-white shadow-lg z-50">
+
+                                    <Link
+                                        to="/dashboard/profile"
+                                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                                        onClick={() => setUserMenuOpen(false)}
+                                    >
+                                        Profile
+                                    </Link>
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-100"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                     </div>

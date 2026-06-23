@@ -29,6 +29,7 @@ import DownloadsPage from "./pages/DownloadsPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import ProfilePage from "./pages/FullProfile";
 import Contact from "./components/home/Contact";
+import Profile from "./pages/Profile";
 
 import NotFound from "./pages/NotFound";
 
@@ -61,6 +62,7 @@ const App = () => {
               <Route path="history" element={<HistoryPage />} />
               <Route path="downloads" element={<DownloadsPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
+              <Route path="profile" element={<Profile />} />
 
               <Route path="profile/:id" element={<ProfilePage />} />
             </Route>
