@@ -10,8 +10,44 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPw, setShowPw] = useState(false);
+    const [showForgotModal, setShowForgotModal] = useState(false);
+    const [forgotEmail, setForgotEmail] = useState("");
 
     const navigate = useNavigate();
+
+    const handleForgotPassword = async () => {
+        try {
+            const res = await fetch(
+                "https://corpfinder-backend.onrender.com/user/forgot-password",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: forgotEmail
+                    })
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.msg);
+                return;
+            }
+
+            alert("Reset link sent to your email, please check your inbox.");
+
+            setForgotEmail("");
+            setShowForgotModal(false);
+
+        } catch (err) {
+            console.log(err);
+            alert("Server Error");
+        }
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -133,6 +169,16 @@ const Login = () => {
                                 </div>
                             </div>
 
+                            <div className="text-right mt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotModal(true)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                >
+                                    Forgot Password?
+                                </button>
+                            </div>
+
                             <button type="submit" className="btn-primary w-full py-3.5">
                                 Sign In
                             </button>
@@ -148,6 +194,53 @@ const Login = () => {
                             </Link>
                         </p>
                     </motion.div>
+
+                    {
+                        showForgotModal && (
+                            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-xl p-6 w-[90%] max-w-md shadow-xl">
+
+                                    <h2 className="text-xl font-bold mb-2">
+                                        Forgot Password
+                                    </h2>
+
+                                    <p className="text-gray-500 text-sm mb-4">
+                                        Enter your registered email address.
+                                    </p>
+
+                                    <input
+                                        type="email"
+                                        value={forgotEmail}
+                                        onChange={(e) =>
+                                            setForgotEmail(e.target.value)
+                                        }
+                                        placeholder="Enter Email"
+                                        className="w-full border p-3 rounded-lg mb-4"
+                                    />
+
+                                    <div className="flex justify-end gap-3">
+
+                                        <button
+                                            onClick={() =>
+                                                setShowForgotModal(false)
+                                            }
+                                            className="px-4 py-2 border rounded-lg"
+                                        >
+                                            Cancel
+                                        </button>
+
+                                        <button
+                                            onClick={handleForgotPassword}
+                                            className="px-4 py-2 btn-primary1 text-white rounded-lg"
+                                        >
+                                            Send Link
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
                 </div>
             </div>
             <Footer />

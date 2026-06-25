@@ -20,6 +20,7 @@ import AdminAddingFullEmployees from "./pages/AdminEmployeesCompany";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import RefundPolicy from "./pages/RefundPolicy";
+import ResetPassword from "./pages/ResetPassword";
 
 import DashboardLayout from "./components/layout/DashboardLayout";
 import DashboardHome from "./pages/DashboardHome";
@@ -55,6 +56,7 @@ const App = () => {
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
             <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<DashboardHome />} />
